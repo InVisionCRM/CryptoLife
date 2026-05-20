@@ -1,0 +1,3156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CryptoLife — v0.2 alpha</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #fff;
+  }
+
+  .game-info {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    margin-bottom: 16px;
+    text-align: center;
+    max-width: 340px;
+    line-height: 1.5;
+  }
+  .game-info strong { color: #fff; font-weight: 500; }
+
+  .phone {
+    width: 380px;
+    height: 780px;
+    background: #000;
+    border-radius: 48px;
+    padding: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
+
+  .wallpaper {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    transition: background 1.5s ease;
+  }
+  .wp-sunset.theme-light { background: linear-gradient(180deg, #fed7aa 0%, #fbcfe8 50%, #f9a8d4 100%); }
+  .wp-sunset.theme-dark { background: linear-gradient(180deg, #1e1b4b 0%, #581c87 50%, #831843 100%); }
+  .wp-ocean.theme-light { background: linear-gradient(180deg, #bae6fd 0%, #99f6e4 100%); }
+  .wp-ocean.theme-dark { background: linear-gradient(180deg, #0c4a6e 0%, #134e4a 100%); }
+  .wp-charcoal.theme-light { background: linear-gradient(180deg, #f5f5f4 0%, #e7e5e4 100%); }
+  .wp-charcoal.theme-dark { background: linear-gradient(180deg, #18181b 0%, #27272a 100%); }
+  .wp-lavender.theme-light { background: linear-gradient(180deg, #ddd6fe 0%, #fbcfe8 100%); }
+  .wp-lavender.theme-dark { background: linear-gradient(180deg, #2e1065 0%, #500724 100%); }
+  .wp-matrix.theme-light { background: #fafafa; background-image: radial-gradient(circle, #d4d4d8 1px, transparent 1px); background-size: 18px 18px; }
+  .wp-matrix.theme-dark { background: #0a0a0a; background-image: radial-gradient(circle, #166534 1px, transparent 1px); background-size: 18px 18px; }
+
+  .statusbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 18px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 100;
+    transition: color 0.4s ease;
+    font-variant-numeric: tabular-nums;
+  }
+  .statusbar.theme-light { color: #111; }
+  .statusbar.theme-dark { color: #fff; }
+  .sb-left, .sb-right { display: flex; align-items: center; gap: 6px; }
+  .sb-right { font-size: 12px; }
+  .hud-pill {
+    border-radius: 999px;
+    padding: 3px 9px;
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+  .theme-light .hud-pill { background: rgba(0,0,0,0.07); color: #111; }
+  .theme-dark .hud-pill { background: rgba(0,0,0,0.45); backdrop-filter: blur(10px); color: #fff; }
+  .hud-pill.solid.theme-light { background: rgba(255,255,255,0.95); }
+  .hud-pill.solid.theme-dark { background: rgba(255,255,255,0.15); }
+  .hud-pill .lbl { opacity: 0.55; font-weight: 500; }
+  .hud-pill .val { font-weight: 500; }
+  .hud-pill .val-up { color: #16a34a; }
+  .hud-pill .val-down { color: #dc2626; }
+
+  .home-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    padding-top: 60px;
+    padding-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .home-screen.hidden {
+    opacity: 0;
+    transform: scale(0.94);
+    pointer-events: none;
+  }
+  .home-grid {
+    flex: 1;
+    padding: 30px 24px 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px 14px;
+    align-content: start;
+  }
+  .home-app {
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+  }
+  .home-app:active { transform: scale(0.92); }
+  .home-app-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 26px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .home-app-icon.built {
+    box-shadow: 0 0 0 2px rgba(74,222,128,0.5), 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .home-app-name {
+    font-size: 11px;
+    margin: 6px 0 0;
+    font-weight: 500;
+    transition: color 0.4s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .theme-light .home-app-name { color: #111; text-shadow: 0 1px 2px rgba(255,255,255,0.4); }
+  .theme-dark .home-app-name { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  .home-app-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #dc2626;
+    color: white;
+    font-size: 9px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 1px 5px;
+    min-width: 16px;
+    line-height: 1.3;
+  }
+
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 130px;
+    height: 5px;
+    border-radius: 3px;
+    z-index: 200;
+    cursor: pointer;
+    transition: background 0.4s ease;
+  }
+  .home-indicator.theme-light { background: rgba(0,0,0,0.35); }
+  .home-indicator.theme-dark { background: rgba(255,255,255,0.5); }
+
+  .app-stage {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .app-stage.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .app-window {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f2f2f7;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+  }
+  .app-window.theme-dark { background: #000; color: #fff; }
+  .app-window.active { display: flex; }
+
+  .placeholder-app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .placeholder-header {
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 0.5px solid #d1d5db;
+    background: #fff;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .placeholder-header { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .ph-back {
+    color: #f97316;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+  }
+  .ph-title {
+    font-size: 15px;
+    font-weight: 500;
+    flex: 1;
+    text-align: center;
+    margin-right: 50px;
+    transition: color 0.4s ease;
+  }
+  .theme-light .ph-title { color: #111; }
+  .theme-dark .ph-title { color: #fff; }
+  .placeholder-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+  }
+  .ph-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.35; }
+  .ph-msg-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    transition: color 0.4s ease;
+  }
+  .theme-light .ph-msg-title { color: #111; }
+  .theme-dark .ph-msg-title { color: #fff; }
+  .ph-msg-sub {
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 260px;
+    margin: 0;
+    transition: color 0.4s ease;
+  }
+  .theme-light .ph-msg-sub { color: #6b7280; }
+  .theme-dark .ph-msg-sub { color: rgba(255,255,255,0.55); }
+
+  .settings-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 40px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .settings-section-label {
+    padding: 14px 22px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    opacity: 0.55;
+    text-transform: uppercase;
+  }
+  .settings-card {
+    margin: 0 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: background 0.4s ease;
+  }
+  .theme-light .settings-card { background: #fff; }
+  .theme-dark .settings-card { background: #1c1c1e; }
+  .settings-row {
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.4s ease;
+  }
+  .settings-row + .settings-row { border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .theme-dark .settings-row + .settings-row { border-top-color: rgba(255,255,255,0.08); }
+  .settings-row:active { background: rgba(0,0,0,0.04); }
+  .theme-dark .settings-row:active { background: rgba(255,255,255,0.06); }
+  .settings-row-icon { font-size: 18px; opacity: 0.6; }
+  .settings-row-label { flex: 1; font-size: 14px; }
+  .settings-row-val { font-size: 12px; opacity: 0.55; }
+  .settings-row-arrow { font-size: 14px; opacity: 0.35; }
+
+  .toggle {
+    width: 42px;
+    height: 24px;
+    border-radius: 14px;
+    background: #34c759;
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.2s ease;
+  }
+  .toggle.off { background: #e5e5ea; }
+  .theme-dark .toggle.off { background: #39393d; }
+  .toggle.off::after { left: 2px; right: auto; }
+
+  .wallpaper-picker {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 40px;
+  }
+  .wp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+  .wp-swatch {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+  .wp-swatch.selected { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25); }
+  .wp-swatch-name {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    color: white;
+  }
+  .wp-swatch.light-name .wp-swatch-name { color: #111; text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
+  .wp-swatch-locked {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    background: #e7e5e4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 20px;
+    border: 2px solid transparent;
+  }
+  .theme-dark .wp-swatch-locked { background: #1c1c1e; color: #6b7280; }
+  .wp-mode-section {
+    padding: 12px 18px 18px;
+    transition: color 0.4s ease;
+  }
+  .wp-mode-section h3 {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 0 4px;
+  }
+  .wp-mode-section p {
+    font-size: 11px;
+    opacity: 0.55;
+    line-height: 1.5;
+  }
+
+  .app-header {
+    background: #fff;
+    padding: 10px 18px 8px;
+    border-bottom: 0.5px solid #d1d5db;
+    flex-shrink: 0;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .app-header { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .app-header-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f97316;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 6px;
+  }
+  .app-title { font-size: 17px; font-weight: 600; margin: 0; transition: color 0.4s ease; }
+  .theme-light .app-title { color: #111; }
+  .theme-dark .app-title { color: #fff; }
+  .app-subtitle { font-size: 12px; margin: 2px 0 0; transition: color 0.4s ease; }
+  .theme-light .app-subtitle { color: #6b7280; }
+  .theme-dark .app-subtitle { color: rgba(255,255,255,0.55); }
+  .app-subtitle .bag { color: #16a34a; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .app-subtitle .clock { font-variant-numeric: tabular-nums; }
+
+  .news-ticker {
+    background: #fffbeb;
+    border-bottom: 0.5px solid #fde68a;
+    padding: 6px 18px;
+    overflow: hidden;
+    height: 24px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-dark .news-ticker { background: rgba(251, 191, 36, 0.12); border-bottom-color: rgba(251, 191, 36, 0.25); }
+  .news-ticker-content {
+    font-size: 11px;
+    color: #92400e;
+    white-space: nowrap;
+    position: absolute;
+    left: 18px;
+    top: 6px;
+    transition: opacity 0.3s;
+  }
+  .theme-dark .news-ticker-content { color: #fbbf24; }
+  .news-ticker-content::before {
+    content: "•";
+    color: #f59e0b;
+    margin-right: 6px;
+    font-size: 14px;
+    vertical-align: -1px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 20px;
+    padding: 8px 18px 0;
+    background: #fff;
+    border-bottom: 0.5px solid #e5e7eb;
+    flex-shrink: 0;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .tabs { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .tab {
+    font-size: 13px;
+    padding-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+    position: relative;
+    opacity: 0.55;
+  }
+  .theme-light .tab { color: #111; }
+  .theme-dark .tab { color: #fff; }
+  .tab.active {
+    opacity: 1;
+    font-weight: 600;
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #f97316;
+    border-radius: 2px 2px 0 0;
+  }
+  .tab-badge {
+    display: inline-block;
+    background: #dc2626;
+    color: white;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    font-weight: 600;
+    vertical-align: 1px;
+  }
+
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    background: #f8fafc;
+    transition: background 0.4s ease;
+  }
+  .theme-dark .scroll-area { background: #0a0a0a; }
+
+  .section-label {
+    padding: 10px 18px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    transition: color 0.4s ease, background 0.4s ease;
+  }
+  .theme-light .section-label { color: #6b7280; background: #f8fafc; }
+  .theme-dark .section-label { color: rgba(255,255,255,0.45); background: #0a0a0a; }
+
+  .asset-row {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-bottom: 0.5px solid #f3f4f6;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.4s ease;
+  }
+  .theme-dark .asset-row { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.05); }
+  .asset-row:active { background: #f9fafb; }
+  .theme-dark .asset-row:active { background: #2c2c2e; }
+  .asset-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .asset-info { flex: 1; min-width: 0; }
+  .asset-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.4s ease;
+  }
+  .theme-light .asset-name { color: #111; }
+  .theme-dark .asset-name { color: #fff; }
+  .asset-meta {
+    font-size: 11px;
+    margin: 2px 0 0;
+    transition: color 0.4s ease;
+  }
+  .theme-light .asset-meta { color: #6b7280; }
+  .theme-dark .asset-meta { color: rgba(255,255,255,0.5); }
+  .asset-spark { width: 60px; height: 28px; flex-shrink: 0; }
+  .asset-price { text-align: right; min-width: 80px; font-variant-numeric: tabular-nums; }
+  .price-num { font-size: 13px; font-weight: 600; margin: 0; transition: color 0.4s ease; }
+  .theme-light .price-num { color: #111; }
+  .theme-dark .price-num { color: #fff; }
+  .price-pct { font-size: 11px; margin: 2px 0 0; font-weight: 500; }
+  .pct-up { color: #16a34a; }
+  .pct-down { color: #dc2626; }
+  .pct-flat { color: #6b7280; }
+  .theme-dark .pct-flat { color: rgba(255,255,255,0.5); }
+
+  .badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-new { background: #fef3c7; color: #92400e; }
+  .badge-hot { background: #fee2e2; color: #991b1b; }
+  .badge-rugged { background: #1f2937; color: #f87171; }
+  .badge-real { background: #ddd6fe; color: #5b21b6; }
+  .badge-dodged { background: #d1fae5; color: #065f46; }
+  .badge-hit { background: #fee2e2; color: #991b1b; }
+
+  .tab-bar {
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid #e5e7eb;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 24px;
+    flex-shrink: 0;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .tab-bar { background: rgba(28,28,30,0.97); border-top-color: rgba(255,255,255,0.1); }
+  .tab-item {
+    text-align: center;
+    font-size: 10px;
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
+    opacity: 0.55;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .theme-light .tab-item { color: #6b7280; }
+  .theme-dark .tab-item { color: rgba(255,255,255,0.55); }
+  .tab-item.active { color: #f97316; opacity: 1; }
+  .tab-item .icon { font-size: 22px; line-height: 1; }
+  .tab-item .label { display: block; margin-top: 2px; font-weight: 500; }
+
+  .detail-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out, background 0.4s ease;
+    overflow: hidden;
+  }
+  .theme-dark .detail-view { background: #000; }
+  .detail-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 16px;
+  }
+  .detail-view.open { transform: translateX(0); }
+  .detail-header {
+    padding: 12px 14px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 0.5px solid #e5e7eb;
+    background: #fff;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .detail-header { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .back-btn {
+    color: #f97316;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 8px 4px 0;
+  }
+  .detail-asset-info { flex: 1; min-width: 0; }
+  .detail-asset-name { font-size: 15px; font-weight: 600; margin: 0; transition: color 0.4s ease; }
+  .theme-light .detail-asset-name { color: #111; }
+  .theme-dark .detail-asset-name { color: #fff; }
+  .detail-asset-sub { font-size: 11px; margin: 1px 0 0; transition: color 0.4s ease; }
+  .theme-light .detail-asset-sub { color: #6b7280; }
+  .theme-dark .detail-asset-sub { color: rgba(255,255,255,0.55); }
+
+  .detail-price-section {
+    padding: 16px 18px 8px;
+    background: #fff;
+    transition: background 0.4s ease;
+  }
+  .theme-dark .detail-price-section { background: #1c1c1e; }
+  .detail-price {
+    font-size: 28px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    transition: color 0.4s ease;
+  }
+  .theme-light .detail-price { color: #111; }
+  .theme-dark .detail-price { color: #fff; }
+  .detail-change {
+    font-size: 13px;
+    margin: 4px 0 0;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .chart-container {
+    height: 180px;
+    padding: 8px 16px;
+    background: #fff;
+    position: relative;
+    transition: background 0.4s ease;
+  }
+  .theme-dark .chart-container { background: #1c1c1e; }
+  .chart-container canvas { max-height: 100% !important; }
+
+  .timeframe-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 6px 18px 10px;
+    background: #fff;
+    border-bottom: 0.5px solid #e5e7eb;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .timeframe-tabs { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .tf-tab {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border: 0;
+    font-weight: 500;
+    opacity: 0.55;
+  }
+  .theme-light .tf-tab { color: #111; }
+  .theme-dark .tf-tab { color: #fff; }
+  .tf-tab.active {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+    opacity: 1;
+  }
+  .theme-dark .tf-tab.active { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+
+  .position-box {
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-bottom: 0.5px solid #e5e7eb;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .position-box { background: #0a0a0a; border-bottom-color: rgba(255,255,255,0.1); }
+  .position-label {
+    font-size: 10px;
+    margin: 0 0 6px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    transition: color 0.4s ease;
+  }
+  .theme-light .position-label { color: #6b7280; }
+  .theme-dark .position-label { color: rgba(255,255,255,0.55); }
+  .position-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 4px 0;
+  }
+  .position-row .key { font-size: 12px; transition: color 0.4s ease; }
+  .theme-light .position-row .key { color: #6b7280; }
+  .theme-dark .position-row .key { color: rgba(255,255,255,0.55); }
+  .position-row .val {
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.4s ease;
+  }
+  .theme-light .position-row .val { color: #111; }
+  .theme-dark .position-row .val { color: #fff; }
+  .position-pnl { font-size: 11px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  .investigate-section {
+    padding: 12px 18px;
+    background: #fff;
+    border-bottom: 0.5px solid #e5e7eb;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .investigate-section { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .investigate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .investigate-btn {
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid;
+    text-align: center;
+  }
+  .inv-tg { background: #f0f9ff; color: #075985; border-color: #bae6fd; }
+  .inv-x { background: #fafafa; color: #111; border-color: #d4d4d4; }
+  .inv-contract { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
+  .inv-holders { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+
+  .warning-box {
+    background: #fef2f2;
+    border-left: 3px solid #dc2626;
+    padding: 10px 14px;
+    margin: 0;
+  }
+  .warning-box.amber {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+  }
+  .warning-box .title {
+    font-size: 11px;
+    color: #991b1b;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: 0.04em;
+  }
+  .warning-box.amber .title { color: #92400e; }
+  .warning-box .body {
+    font-size: 12px;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .trade-buttons {
+    flex-shrink: 0;
+    padding: 14px 14px 24px;
+    background: #fff;
+    border-top: 0.5px solid #e5e7eb;
+    display: flex;
+    gap: 10px;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .trade-buttons { background: #1c1c1e; border-top-color: rgba(255,255,255,0.1); }
+  .btn-sell, .btn-buy {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+  }
+  .btn-sell {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  .btn-buy {
+    background: #16a34a;
+    color: white;
+  }
+  .btn-sell:disabled, .btn-buy:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+  .trade-modal {
+    width: 100%;
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 16px 18px 24px;
+    transform: translateY(100%);
+    transition: transform 0.25s ease-out, background 0.4s ease;
+  }
+  .theme-dark .trade-modal { background: #1c1c1e; color: #fff; }
+  .modal-backdrop.open .trade-modal { transform: translateY(0); }
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: #d1d5db;
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .modal-title { font-size: 15px; font-weight: 700; margin: 0; }
+  .theme-light .modal-title { color: #111; }
+  .theme-dark .modal-title { color: #fff; }
+  .modal-sub { font-size: 11px; margin: 1px 0 0; font-variant-numeric: tabular-nums; }
+  .theme-light .modal-sub { color: #6b7280; }
+  .theme-dark .modal-sub { color: rgba(255,255,255,0.55); }
+  .pay-box {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    transition: background 0.4s ease;
+  }
+  .theme-dark .pay-box { background: #0a0a0a; }
+  .pay-label {
+    font-size: 11px;
+    margin: 0 0 6px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .theme-light .pay-label { color: #6b7280; }
+  .theme-dark .pay-label { color: rgba(255,255,255,0.55); }
+  .pay-amount-row { display: flex; align-items: baseline; gap: 6px; }
+  .pay-input {
+    font-size: 32px;
+    font-weight: 700;
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    padding: 0;
+  }
+  .theme-light .pay-input { color: #111; }
+  .theme-dark .pay-input { color: #fff; }
+  .pay-balance { font-size: 11px; margin: 6px 0 0; }
+  .theme-light .pay-balance { color: #6b7280; }
+  .theme-dark .pay-balance { color: rgba(255,255,255,0.55); }
+  .pct-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .pct-btn {
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #111;
+    border: none;
+    cursor: pointer;
+  }
+  .theme-dark .pct-btn { background: #2c2c2e; color: #fff; }
+  .receive-box {
+    background: #f0fdf4;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .theme-dark .receive-box { background: rgba(34,197,94,0.12); }
+  .receive-amount {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 4px 0 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .theme-light .receive-amount { color: #111; }
+  .theme-dark .receive-amount { color: #fff; }
+  .modal-confirm {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    color: white;
+  }
+  .modal-confirm.buy { background: #16a34a; }
+  .modal-confirm.sell { background: #dc2626; }
+  .modal-cancel {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  .theme-light .modal-cancel { color: #6b7280; }
+  .theme-dark .modal-cancel { color: rgba(255,255,255,0.55); }
+
+  .toast {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success { background: rgba(22,163,74,0.95); }
+  .toast.error { background: rgba(220,38,38,0.95); }
+
+  .portfolio-summary {
+    padding: 16px 18px;
+    background: #fff;
+    border-bottom: 0.5px solid #e5e7eb;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .portfolio-summary { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .portfolio-total {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 2px 0 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .theme-light .portfolio-total { color: #111; }
+  .theme-dark .portfolio-total { color: #fff; }
+  .portfolio-pnl {
+    font-size: 13px;
+    margin: 4px 0 0;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .allocation-bar {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 14px;
+    background: #f3f4f6;
+  }
+  .theme-dark .allocation-bar { background: #2c2c2e; }
+  .allocation-seg { height: 100%; }
+
+  .launch-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-left: 3px solid #16a34a;
+    padding: 12px 18px;
+  }
+  .launch-banner.morbius {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    border-left-color: #7c3aed;
+  }
+  .theme-dark .launch-banner {
+    background: rgba(34,197,94,0.08);
+  }
+  .theme-dark .launch-banner.morbius {
+    background: rgba(124,58,237,0.12);
+  }
+  .launch-banner-label {
+    font-size: 10px;
+    color: #15803d;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.05em;
+  }
+  .theme-dark .launch-banner-label { color: #4ade80; }
+  .launch-banner.morbius .launch-banner-label { color: #5b21b6; }
+  .theme-dark .launch-banner.morbius .launch-banner-label { color: #c4b5fd; }
+  .launch-banner-title {
+    font-size: 14px;
+    margin: 4px 0 0;
+    font-weight: 600;
+  }
+  .theme-light .launch-banner-title { color: #111; }
+  .theme-dark .launch-banner-title { color: #fff; }
+  .launch-banner-desc {
+    font-size: 11px;
+    margin: 2px 0 0;
+  }
+  .theme-light .launch-banner-desc { color: #6b7280; }
+  .theme-dark .launch-banner-desc { color: rgba(255,255,255,0.55); }
+
+  .rugged-row {
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 0.5px solid #f3f4f6;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .rugged-row { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.05); }
+  .rugged-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .rugged-summary.hit { background: #fef2f2; color: #991b1b; }
+  .rugged-summary.dodged { background: #f0fdf4; color: #15803d; }
+  .rugged-summary.skipped { background: #f9fafb; color: #6b7280; }
+  .theme-dark .rugged-summary.hit { background: rgba(220,38,38,0.15); color: #fca5a5; }
+  .theme-dark .rugged-summary.dodged { background: rgba(34,197,94,0.15); color: #86efac; }
+  .theme-dark .rugged-summary.skipped { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.55); }
+
+  .empty-state {
+    padding: 60px 32px;
+    text-align: center;
+  }
+  .theme-light .empty-state { color: #6b7280; }
+  .theme-dark .empty-state { color: rgba(255,255,255,0.4); }
+  .empty-state .icon { font-size: 32px; margin-bottom: 8px; opacity: 0.5; }
+  .empty-state .text { font-size: 13px; }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #16a34a;
+    animation: pulse 2s infinite;
+    margin-right: 6px;
+    vertical-align: 1px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  ::-webkit-scrollbar { width: 0; }
+
+  .x-app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    transition: background 0.4s ease;
+  }
+  .theme-dark .x-app { background: #000; }
+
+  .x-header {
+    padding: 10px 18px 8px;
+    border-bottom: 0.5px solid #e5e7eb;
+    background: #fff;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .x-header { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .x-back {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #f97316;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+  }
+  .x-logo {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    margin-right: 50px;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-logo { color: #fff; }
+
+  .x-tab-strip {
+    display: flex;
+    padding: 4px 14px;
+    border-bottom: 0.5px solid #e5e7eb;
+    background: #fff;
+    flex-shrink: 0;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .x-tab-strip { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
+  .x-strip-tab {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 0;
+    color: #6b7280;
+    font-weight: 500;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+  }
+  .theme-dark .x-strip-tab { color: rgba(255,255,255,0.55); }
+  .x-strip-tab.active {
+    color: #111;
+    font-weight: 600;
+  }
+  .theme-dark .x-strip-tab.active { color: #fff; }
+  .x-strip-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 3px;
+    background: #1d9bf0;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .x-feed {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    transition: background 0.4s ease;
+    -webkit-overflow-scrolling: touch;
+  }
+  .theme-dark .x-feed { background: #000; }
+
+  .x-tweet {
+    padding: 12px 16px;
+    display: flex;
+    gap: 12px;
+    border-bottom: 0.5px solid #f3f4f6;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.4s ease;
+  }
+  .theme-dark .x-tweet { border-bottom-color: rgba(255,255,255,0.06); }
+  .x-tweet:active { background: #f9fafb; }
+  .theme-dark .x-tweet:active { background: rgba(255,255,255,0.04); }
+  .x-tweet.fresh { background: rgba(29, 155, 240, 0.04); }
+  .theme-dark .x-tweet.fresh { background: rgba(29, 155, 240, 0.08); }
+
+  .x-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .x-body { flex: 1; min-width: 0; }
+  .x-name-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .x-name {
+    color: #111;
+    font-weight: 600;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-name { color: #fff; }
+  .x-verify {
+    color: #1d9bf0;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .x-verify-gold {
+    color: #fbbf24;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .x-handle {
+    color: #6b7280;
+    font-size: 12px;
+  }
+  .theme-dark .x-handle { color: rgba(255,255,255,0.5); }
+  .x-dot { color: #6b7280; font-size: 12px; margin: 0 2px; }
+  .theme-dark .x-dot { color: rgba(255,255,255,0.4); }
+  .x-time {
+    color: #6b7280;
+    font-size: 12px;
+  }
+  .theme-dark .x-time { color: rgba(255,255,255,0.5); }
+  .x-text {
+    font-size: 14px;
+    color: #111;
+    line-height: 1.4;
+    margin: 4px 0 0;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-text { color: #fff; }
+  .x-meta {
+    display: flex;
+    gap: 22px;
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 12px;
+  }
+  .theme-dark .x-meta { color: rgba(255,255,255,0.5); }
+  .x-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .x-detail {
+    padding: 16px 18px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .x-detail-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .x-detail-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-detail-name { color: #fff; }
+  .x-detail-handle {
+    font-size: 12px;
+    color: #6b7280;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-detail-handle { color: rgba(255,255,255,0.5); }
+  .x-detail-text {
+    font-size: 17px;
+    color: #111;
+    line-height: 1.45;
+    margin: 14px 0;
+    white-space: pre-wrap;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-detail-text { color: #fff; }
+  .x-detail-time {
+    font-size: 13px;
+    color: #6b7280;
+    padding-bottom: 14px;
+    border-bottom: 0.5px solid #f3f4f6;
+    transition: color 0.4s ease, border-color 0.4s ease;
+  }
+  .theme-dark .x-detail-time { color: rgba(255,255,255,0.5); border-bottom-color: rgba(255,255,255,0.1); }
+  .x-detail-meta {
+    display: flex;
+    gap: 24px;
+    padding-top: 14px;
+    font-size: 14px;
+    color: #6b7280;
+    transition: color 0.4s ease;
+  }
+  .theme-dark .x-detail-meta { color: rgba(255,255,255,0.5); }
+  .x-detail-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .x-empty {
+    padding: 80px 32px;
+    text-align: center;
+    color: #6b7280;
+  }
+  .theme-dark .x-empty { color: rgba(255,255,255,0.4); }
+
+  .ti {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    vertical-align: middle;
+  }
+  .ti svg {
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
+</head>
+<body>
+
+<div class="game-info">
+  <strong>CryptoLife · v0.2 alpha</strong><br>
+  tap CoinHub to trade. tap Settings to customize. other apps coming soon.<br>
+  time flows. markets move. light/dark auto-switches with game time.
+</div>
+
+<div class="phone">
+  <div class="screen" id="screen">
+    <div class="wallpaper wp-sunset theme-light" id="wallpaper"></div>
+
+    <div class="statusbar theme-light" id="statusbar">
+      <div class="sb-left">
+        <span id="sb-time">9:41</span>
+        <span class="hud-pill" id="hud-bag"><span class="lbl">bag</span><span class="val val-up" id="hud-bag-val">$10,000</span></span>
+      </div>
+      <div class="sb-right">
+        <span class="hud-pill" id="hud-clock"><span class="val" id="hud-clock-val">D1 · 9:00a</span></span>
+        <i class="ti ti-signal-4g" aria-hidden="true"></i>
+        <i class="ti ti-wifi" aria-hidden="true"></i>
+        <i class="ti ti-battery-3" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <div class="home-screen" id="home-screen">
+      <div class="home-grid" id="home-grid"></div>
+    </div>
+
+    <div class="app-stage" id="app-stage">
+      <div class="app-window" id="window-coinhub">
+        <div class="app-header">
+          <div class="app-header-back" data-go-home="true"><i class="ti ti-chevron-left"></i><span>Home</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <p class="app-title">CoinHub</p>
+              <p class="app-subtitle">bag: <span class="bag" id="bag-value">$10,000.00</span> · <span class="clock" id="game-clock">Day 1 · 9:00 AM</span></p>
+            </div>
+            <div style="font-size:11px;opacity:0.55;text-align:right;align-self:center;">
+              <span class="pulse-dot"></span>live
+            </div>
+          </div>
+        </div>
+        <div class="news-ticker" id="news-ticker">
+          <div class="news-ticker-content" id="news-content">markets calm · no major catalysts</div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" data-tab="markets">Markets</div>
+          <div class="tab" data-tab="portfolio">Portfolio</div>
+          <div class="tab" data-tab="launches">Launches <span class="tab-badge" id="launches-badge" style="display:none;">0</span></div>
+          <div class="tab" data-tab="rugged">Rugged</div>
+        </div>
+        <div class="scroll-area" id="scroll-area">
+          <div id="tab-markets" class="tab-content"></div>
+          <div id="tab-portfolio" class="tab-content" style="display:none;"></div>
+          <div id="tab-launches" class="tab-content" style="display:none;"></div>
+          <div id="tab-rugged" class="tab-content" style="display:none;"></div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active" data-tab="markets"><div class="icon"><i class="ti ti-chart-candle" aria-hidden="true"></i></div><span class="label">Market</span></div>
+          <div class="tab-item" data-tab="portfolio"><div class="icon"><i class="ti ti-wallet" aria-hidden="true"></i></div><span class="label">Wallet</span></div>
+          <div class="tab-item" data-tab="launches"><div class="icon"><i class="ti ti-rocket" aria-hidden="true"></i></div><span class="label">Launches</span></div>
+          <div class="tab-item" data-tab="rugged"><div class="icon"><i class="ti ti-skull" aria-hidden="true"></i></div><span class="label">Rugged</span></div>
+        </div>
+        <div class="detail-view" id="detail-view">
+          <div class="detail-header">
+            <span class="back-btn" id="back-btn">← Back</span>
+            <div class="asset-icon" id="detail-icon" style="width:32px;height:32px;font-size:12px;">B</div>
+            <div class="detail-asset-info">
+              <p class="detail-asset-name" id="detail-name">—</p>
+              <p class="detail-asset-sub" id="detail-sub">—</p>
+            </div>
+          </div>
+          <div class="detail-scroll">
+            <div class="detail-price-section">
+              <p class="detail-price" id="detail-price">$0.00</p>
+              <p class="detail-change" id="detail-change">—</p>
+            </div>
+            <div class="chart-container">
+              <canvas id="price-chart"></canvas>
+            </div>
+            <div class="timeframe-tabs">
+              <button class="tf-tab active" data-tf="1H">1H</button>
+              <button class="tf-tab" data-tf="4H">4H</button>
+              <button class="tf-tab" data-tf="24H">24H</button>
+              <button class="tf-tab" data-tf="ALL">ALL</button>
+            </div>
+            <div id="detail-position-area"></div>
+            <div id="detail-warning-area"></div>
+            <div id="detail-investigate-area"></div>
+          </div>
+          <div class="trade-buttons">
+            <button class="btn-sell" id="btn-sell">Sell</button>
+            <button class="btn-buy" id="btn-buy">Buy</button>
+          </div>
+        </div>
+        <div class="modal-backdrop" id="modal-backdrop">
+          <div class="trade-modal">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+              <div class="asset-icon" id="modal-icon" style="width:32px;height:32px;font-size:12px;">B</div>
+              <div>
+                <p class="modal-title" id="modal-title">Buy Bitcoin</p>
+                <p class="modal-sub" id="modal-sub">1 BTC = $98,420</p>
+              </div>
+            </div>
+            <div class="pay-box">
+              <p class="pay-label">YOU PAY</p>
+              <div class="pay-amount-row">
+                <span style="font-size:24px;font-weight:700;">$</span>
+                <input type="number" class="pay-input" id="pay-input" placeholder="0" min="0" />
+              </div>
+              <p class="pay-balance" id="pay-balance">balance: $10,000.00 DAI</p>
+            </div>
+            <div class="pct-buttons">
+              <button class="pct-btn" data-pct="0.1">10%</button>
+              <button class="pct-btn" data-pct="0.25">25%</button>
+              <button class="pct-btn" data-pct="0.5">50%</button>
+              <button class="pct-btn" data-pct="1">MAX</button>
+            </div>
+            <div class="receive-box">
+              <p class="pay-label">YOU RECEIVE</p>
+              <p class="receive-amount" id="receive-amount">0 BTC</p>
+            </div>
+            <button class="modal-confirm buy" id="modal-confirm">Confirm Buy</button>
+            <button class="modal-cancel" id="modal-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-window" id="window-settings">
+        <div class="placeholder-app">
+          <div class="placeholder-header">
+            <span class="ph-back" data-go-home="true"><i class="ti ti-chevron-left"></i> Home</span>
+            <p class="ph-title">Settings</p>
+          </div>
+          <div class="settings-scroll" id="settings-scroll">
+            <div class="settings-section-label">Display</div>
+            <div class="settings-card">
+              <div class="settings-row" data-settings-action="wallpaper">
+                <i class="ti ti-photo settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Wallpaper</span>
+                <span class="settings-row-val" id="settings-wp-name">Sunset</span>
+                <i class="ti ti-chevron-right settings-row-arrow" aria-hidden="true"></i>
+              </div>
+              <div class="settings-row" data-settings-action="dark-mode">
+                <i class="ti ti-moon settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Dark mode</span>
+                <span class="settings-row-val" id="settings-dm-name">Auto</span>
+                <i class="ti ti-chevron-right settings-row-arrow" aria-hidden="true"></i>
+              </div>
+              <div class="settings-row" data-settings-action="hud-style">
+                <i class="ti ti-info-circle settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">HUD pill style</span>
+                <span class="settings-row-val" id="settings-hud-name">Translucent</span>
+                <i class="ti ti-chevron-right settings-row-arrow" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="settings-section-label">Sounds</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <i class="ti ti-volume settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Notifications</span>
+                <div class="toggle"></div>
+              </div>
+              <div class="settings-row">
+                <i class="ti ti-bell-ringing settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Toast sounds</span>
+                <div class="toggle off"></div>
+              </div>
+            </div>
+            <div class="settings-section-label">About</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <i class="ti ti-device-mobile settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Version</span>
+                <span class="settings-row-val">v0.2 alpha</span>
+              </div>
+              <div class="settings-row" id="restart-run-btn">
+                <i class="ti ti-refresh settings-row-icon" style="color: #dc2626;" aria-hidden="true"></i>
+                <span class="settings-row-label" style="color: #dc2626;">Restart run</span>
+              </div>
+            </div>
+          </div>
+          <div class="wallpaper-picker" id="wallpaper-picker" style="display:none;">
+            <div class="placeholder-header" style="border-bottom: 0.5px solid rgba(0,0,0,0.08);">
+              <span class="ph-back" id="wp-picker-back"><i class="ti ti-chevron-left"></i> Settings</span>
+              <p class="ph-title">Wallpaper</p>
+            </div>
+            <div class="settings-section-label">Choose a wallpaper</div>
+            <div class="wp-grid" id="wp-grid"></div>
+            <div class="wp-mode-section">
+              <h3>Auto switch</h3>
+              <p>each wallpaper has paired light and dark variants. they switch with game time of day (dawn ~6a, dusk ~7p).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-window" id="window-x">
+        <div class="x-app">
+          <div class="x-header">
+            <span class="x-back" data-go-home="true"><i class="ti ti-chevron-left"></i> Home</span>
+            <div class="x-logo">𝕏</div>
+          </div>
+          <div class="x-tab-strip">
+            <div class="x-strip-tab active" data-x-tab="foryou">For you</div>
+            <div class="x-strip-tab" data-x-tab="following">Following</div>
+          </div>
+          <div class="x-feed" id="x-feed"></div>
+          <div class="x-detail" id="x-detail" style="display:none;">
+            <div class="x-back-row" style="margin-bottom: 12px;">
+              <span class="x-back" id="x-detail-back"><i class="ti ti-chevron-left"></i> Feed</span>
+            </div>
+            <div id="x-detail-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-window" id="window-placeholder">
+        <div class="placeholder-app">
+          <div class="placeholder-header">
+            <span class="ph-back" data-go-home="true"><i class="ti ti-chevron-left"></i> Home</span>
+            <p class="ph-title" id="placeholder-title">App</p>
+          </div>
+          <div class="placeholder-body">
+            <div class="ph-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
+            <p class="ph-msg-title">coming soon</p>
+            <p class="ph-msg-sub" id="placeholder-sub">this app is in development. check back as the game grows.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-indicator theme-light" id="home-indicator" data-go-home="true"></div>
+
+    <div class="toast" id="toast">trade confirmed</div>
+  </div>
+</div>
+
+<script>
+const GAME = {
+  startTimestamp: Date.now(),
+  tickRate: 6000,
+  gameMinutesPerTick: 30,
+  gameMinute: 9 * 60,
+  ticks: 0,
+  walletDAI: 10000,
+  walletStartValue: 10000,
+  positions: {},
+  costBasis: {},
+  trades: [],
+  newsHistory: [],
+  currentNews: null,
+  currentTab: "markets",
+  selectedAsset: null,
+  selectedTimeframe: "1H",
+  chart: null,
+  tradeMode: "buy",
+  rugged: [],
+  bigDealQueue: [],
+};
+
+const STATIC_ASSETS = [
+  { id: "BTC", name: "Bitcoin", symbol: "BTC", category: "blue-chip", price: 98420, drift: 0.0002, vol: 0.008, color: "#f7931a", emoji: "₿", desc: "blue chip · vol $42B", investigate: false },
+  { id: "DAI", name: "DAI", symbol: "DAI", category: "stablecoin", price: 1.0, drift: 0, vol: 0.0001, color: "#fbbf24", emoji: "D", desc: "stablecoin · $1 peg", investigate: false, isStable: true },
+  { id: "PLS", name: "PulseChain", symbol: "PLS", category: "L1", price: 0.0042, drift: 0.0001, vol: 0.018, color: "#8b5cf6", emoji: "P", desc: "L1 · real chain", investigate: false },
+  { id: "HEX", name: "HEX", symbol: "HEX", category: "staking", price: 0.0061, drift: -0.0001, vol: 0.022, color: "#ec4899", emoji: "H", desc: "staking · polarizing", investigate: false },
+];
+
+const DYNAMIC_POOL = [
+  { name: "PEPE 2.0", symbol: "PEPE2", category: "meme", emoji: "🐸", color: "#4ade80", price: 0.000142, vol: 0.08, drift: 0.001, rugRisk: 0.4, desc: "meme · anon team", flags: ["anon founder", "2 telegrams found", "liquidity unlocked"], hot: true },
+  { name: "QuantAI", symbol: "QAI", category: "AI", emoji: "Q", color: "#6366f1", price: 0.42, vol: 0.04, drift: 0.0005, rugRisk: 0.15, desc: "AI · doxxed team", flags: ["team doxxed", "audit pending", "low liquidity"] },
+  { name: "Shiba Neo", symbol: "SNEO", category: "meme", emoji: "S", color: "#f59e0b", price: 0.00012, vol: 0.09, drift: -0.0005, rugRisk: 0.55, desc: "meme · 'next 1000x'", flags: ["anon", "no audit", "60% in 3 wallets"], hot: true },
+  { name: "NeuralNet", symbol: "NNET", category: "AI", emoji: "N", color: "#14b8a6", price: 1.42, vol: 0.035, drift: 0.0004, rugRisk: 0.2, desc: "AI · early stage", flags: ["team partial dox", "audit pending"] },
+  { name: "Frogger X", symbol: "FRGX", category: "meme", emoji: "🐸", color: "#84cc16", price: 0.0024, vol: 0.075, drift: 0, rugRisk: 0.5, desc: "meme · revival", flags: ["forked from rugged $FROG", "same dev wallet"], hot: false },
+  { name: "DegenSwap", symbol: "DGN", category: "DeFi", emoji: "D", color: "#0ea5e9", price: 0.084, vol: 0.04, drift: 0.0003, rugRisk: 0.25, desc: "DeFi · new dex", flags: ["audit complete", "team partial dox"] },
+];
+
+const MEME_TEMPLATES = [
+  { name: "ROCKET 100X", symbol: "RKT100X", category: "meme", emoji: "🚀", color: "#dc2626", vol: 0.12, drift: -0.001, rugRisk: 0.85, desc: "meme · '100x guaranteed'", flags: ["anon", "no audit", "80% in 1 wallet"] },
+  { name: "MoonBoy", symbol: "MOON", category: "meme", emoji: "🌙", color: "#a855f7", vol: 0.10, drift: 0.0005, rugRisk: 0.7, desc: "meme · anon", flags: ["anon", "liquidity unlocked", "1hr old"] },
+  { name: "Banana Joe", symbol: "BJOE", category: "meme", emoji: "🍌", color: "#eab308", vol: 0.08, drift: 0.0003, rugRisk: 0.5, desc: "meme · viral on X", flags: ["partial dox", "audit pending"] },
+  { name: "AlphaAI", symbol: "AAI", category: "AI", emoji: "A", color: "#3b82f6", vol: 0.04, drift: 0.0006, rugRisk: 0.2, desc: "AI · serious project", flags: ["team doxxed", "2 audits", "vc backed"] },
+  { name: "ChadCoin", symbol: "CHAD", category: "meme", emoji: "💪", color: "#f97316", vol: 0.085, drift: 0, rugRisk: 0.6, desc: "meme · gigachad theme", flags: ["anon", "no audit"] },
+  { name: "DeepDeFi", symbol: "DDEF", category: "DeFi", emoji: "Δ", color: "#06b6d4", vol: 0.045, drift: 0.0004, rugRisk: 0.25, desc: "DeFi · yield protocol", flags: ["audit complete", "team partial dox", "tvl growing"] },
+];
+
+const MORBIUS_DEF = {
+  name: "MORBIUS",
+  symbol: "MORB",
+  category: "DeFi · real project",
+  emoji: "M",
+  color: "#7c3aed",
+  vol: 0.035,
+  drift: 0.0008,
+  rugRisk: 0,
+  desc: "vampiric DeFi · real protocol",
+  flags: ["real founder doxxed", "liquidity locked 12mo", "contract renounced", "2 audits"],
+  isReal: true,
+  isMorbius: true,
+};
+
+const NEWS_EVENTS = [
+  { text: "Fed signals rate hike — risk-off across crypto", impact: { all: -0.04, stable: 0, blueChip: -0.025 }, weight: 8 },
+  { text: "BTC ETF inflows hit record high", impact: { all: 0.015, blueChip: 0.04, stable: 0 }, weight: 10 },
+  { text: "whale moves 1,000 BTC to exchange", impact: { all: -0.02, blueChip: -0.03, stable: 0 }, weight: 7 },
+  { text: "regulator hints at memecoin crackdown", impact: { all: -0.015, meme: -0.06, stable: 0, blueChip: -0.01 }, weight: 6 },
+  { text: "PulseChain devs ship major upgrade", impact: { PLS: 0.08, HEX: 0.03 }, weight: 5 },
+  { text: "AI sector pumps on tech news", impact: { AI: 0.06 }, weight: 6 },
+  { text: "DAI maintains $1 peg through stress test", impact: {}, weight: 3 },
+  { text: "DeFi TVL crosses new milestone", impact: { DeFi: 0.04, all: 0.005 }, weight: 5 },
+  { text: "major exchange lists new tokens", impact: { all: 0.01 }, weight: 4 },
+  { text: "memecoin szn back · hype climbing", impact: { meme: 0.05, all: 0.005 }, weight: 7 },
+];
+
+const PRICE_HISTORY = {};
+function pushHistory(id, price) {
+  if (!PRICE_HISTORY[id]) PRICE_HISTORY[id] = [];
+  PRICE_HISTORY[id].push({ t: GAME.ticks, price });
+  if (PRICE_HISTORY[id].length > 500) PRICE_HISTORY[id].shift();
+}
+
+const ASSETS = {};
+STATIC_ASSETS.forEach(a => {
+  ASSETS[a.id] = { ...a, isStatic: true };
+  pushHistory(a.id, a.price);
+});
+
+DYNAMIC_POOL.forEach((token, idx) => {
+  const ageInMinutes = (idx + 1) * 90 + Math.floor(Math.random() * 60);
+  const asset = {
+    ...token,
+    id: token.symbol,
+    isStatic: false,
+    investigate: true,
+    launchedAtGameMinute: GAME.gameMinute - ageInMinutes,
+    rugged: false,
+  };
+  ASSETS[token.symbol] = asset;
+  pushHistory(token.symbol, asset.price);
+});
+
+let nextLaunchTick = 15;
+let morbiusScheduledTick = 25;
+let morbiusLaunched = false;
+
+function gaussianRandom() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function fmtPrice(p) {
+  if (p === undefined || p === null || isNaN(p)) return "$0.00";
+  if (p >= 1000) return "$" + p.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  if (p >= 1) return "$" + p.toFixed(2);
+  if (p >= 0.01) return "$" + p.toFixed(4);
+  if (p >= 0.0001) return "$" + p.toFixed(6);
+  return "$" + p.toFixed(8);
+}
+function fmtUSD(v) {
+  if (v === undefined || v === null || isNaN(v)) return "$0.00";
+  return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtPct(p) {
+  if (p === undefined || p === null || isNaN(p)) return "0.0%";
+  const sign = p >= 0 ? "+" : "";
+  return sign + p.toFixed(1) + "%";
+}
+function fmtAmount(amt) {
+  if (amt === undefined || amt === null || isNaN(amt)) return "0";
+  if (amt >= 1000000) return (amt / 1000000).toFixed(2) + "M";
+  if (amt >= 1000) return (amt / 1000).toFixed(2) + "K";
+  if (amt >= 1) return amt.toFixed(4);
+  return amt.toFixed(8);
+}
+
+function fmtAge(gameMinutes) {
+  if (gameMinutes === undefined || gameMinutes === null || gameMinutes < 0) return "—";
+  if (gameMinutes < 1) return "just now";
+  if (gameMinutes < 60) return `${Math.floor(gameMinutes)}m old`;
+  const hours = Math.floor(gameMinutes / 60);
+  const mins = Math.floor(gameMinutes % 60);
+  if (hours < 24) {
+    return mins > 0 ? `${hours}h ${mins}m old` : `${hours}h old`;
+  }
+  const days = Math.floor(hours / 24);
+  const remHours = hours % 24;
+  return remHours > 0 ? `${days}d ${remHours}h old` : `${days}d old`;
+}
+
+function fmtDuration(gameMinutes) {
+  if (gameMinutes === undefined || gameMinutes === null || gameMinutes < 0) return "—";
+  if (gameMinutes < 60) return `${Math.floor(gameMinutes)}m`;
+  const hours = Math.floor(gameMinutes / 60);
+  const mins = Math.floor(gameMinutes % 60);
+  if (hours < 24) return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  const days = Math.floor(hours / 24);
+  const remHours = hours % 24;
+  return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
+}
+
+function getAge(asset) {
+  if (!asset || asset.isStatic || asset.launchedAtGameMinute === undefined) return null;
+  return GAME.gameMinute - asset.launchedAtGameMinute;
+}
+
+function fmtGameTime() {
+  const day = Math.floor(GAME.gameMinute / (24 * 60)) + 1;
+  const minOfDay = GAME.gameMinute % (24 * 60);
+  const hour = Math.floor(minOfDay / 60);
+  const min = minOfDay % 60;
+  const hr12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const ampm = hour < 12 ? "AM" : "PM";
+  return `Day ${day} · ${hr12}:${String(min).padStart(2, "0")} ${ampm}`;
+}
+
+function getMinuteOfDay() {
+  const minOfDay = GAME.gameMinute % (24 * 60);
+  const hour = Math.floor(minOfDay / 60);
+  const min = minOfDay % 60;
+  const hr12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const ampm = hour < 12 ? "AM" : "PM";
+  return `${hr12}:${String(min).padStart(2, "0")} ${ampm}`;
+}
+
+function applyNewsImpact(news) {
+  for (const id in ASSETS) {
+    const a = ASSETS[id];
+    if (a.rugged) continue;
+    let impact = 0;
+    if (news.impact.all !== undefined) impact += news.impact.all;
+    if (a.isStable && news.impact.stable !== undefined) impact += news.impact.stable;
+    else if (news.impact.stable !== undefined && a.isStable) impact += news.impact.stable;
+    if (a.category === "blue-chip" && news.impact.blueChip !== undefined) impact += news.impact.blueChip;
+    if (news.impact[a.id] !== undefined) impact += news.impact[a.id];
+    if (news.impact[a.category] !== undefined) impact += news.impact[a.category];
+    const noise = gaussianRandom() * Math.abs(impact) * 0.4;
+    a.price = Math.max(0.0000001, a.price * (1 + impact + noise));
+  }
+}
+
+function tickPrices() {
+  for (const id in ASSETS) {
+    const a = ASSETS[id];
+    if (a.rugged) continue;
+    if (a.isStable) {
+      const wobble = gaussianRandom() * 0.0008;
+      a.price = Math.max(0.97, Math.min(1.03, 1 + wobble));
+      pushHistory(id, a.price);
+      continue;
+    }
+    const dt = 1;
+    const z = gaussianRandom();
+    const change = a.drift * dt + a.vol * z * Math.sqrt(dt);
+    a.price = Math.max(0.0000001, a.price * (1 + change));
+    if (a.rugRisk && !a.isStatic) {
+      const richnessFactor = Math.min(2, walletTotalValue() / GAME.walletStartValue);
+      const rugChance = a.rugRisk * 0.003 * richnessFactor;
+      if (Math.random() < rugChance) {
+        rugToken(id);
+      }
+    }
+    pushHistory(id, a.price);
+  }
+}
+
+function rugToken(id) {
+  const a = ASSETS[id];
+  if (!a || a.rugged) return;
+  a.rugged = true;
+  const peakPrice = Math.max(...(PRICE_HISTORY[id] || []).map(p => p.price));
+  const heldAmount = GAME.positions[id] || 0;
+  let loss = 0;
+  if (heldAmount > 0) {
+    loss = heldAmount * a.price;
+    GAME.positions[id] = 0;
+  }
+  a.price = a.price * 0.001;
+  pushHistory(id, a.price);
+  GAME.rugged.push({
+    id, name: a.name, symbol: a.symbol, emoji: a.emoji,
+    peakPrice, ruggedAt: GAME.gameMinute,
+    launchedAt: a.launchedAtGameMinute,
+    lifespan: a.launchedAtGameMinute !== undefined ? GAME.gameMinute - a.launchedAtGameMinute : 0,
+    youHeld: heldAmount > 0,
+    loss: loss,
+  });
+  showToast(`💀 ${a.symbol} rugged`, "error");
+  updateLaunchesBadge();
+  if (GAME.currentTab === "rugged") renderRugged();
+}
+
+function launchNewToken() {
+  if (!morbiusLaunched && GAME.ticks >= morbiusScheduledTick) {
+    const morb = {
+      ...MORBIUS_DEF,
+      id: MORBIUS_DEF.symbol,
+      isStatic: false,
+      investigate: true,
+      launchedAtGameMinute: GAME.gameMinute,
+      rugged: false,
+      price: 0.0008,
+      justLaunched: true,
+      isBigDeal: true,
+    };
+    ASSETS[MORBIUS_DEF.symbol] = morb;
+    pushHistory(MORBIUS_DEF.symbol, morb.price);
+    morbiusLaunched = true;
+    GAME.bigDealQueue.push({ symbol: MORBIUS_DEF.symbol, ts: GAME.gameMinute, name: MORBIUS_DEF.name });
+    showToast(`🚀 $MORBIUS just launched`, "success");
+    updateLaunchesBadge();
+    return;
+  }
+  const tpl = MEME_TEMPLATES[Math.floor(Math.random() * MEME_TEMPLATES.length)];
+  let symbol = tpl.symbol;
+  let suffix = 0;
+  while (ASSETS[symbol]) {
+    suffix++;
+    symbol = tpl.symbol + suffix;
+  }
+  const startPrice = tpl.price !== undefined ? tpl.price : Math.random() * 0.001 + 0.00001;
+  const newAsset = {
+    ...tpl,
+    symbol,
+    id: symbol,
+    name: tpl.name,
+    price: startPrice,
+    isStatic: false,
+    investigate: true,
+    launchedAtGameMinute: GAME.gameMinute,
+    rugged: false,
+    justLaunched: true,
+  };
+  ASSETS[symbol] = newAsset;
+  pushHistory(symbol, newAsset.price);
+  const isBigDeal = Math.random() < 0.2;
+  if (isBigDeal) {
+    newAsset.isBigDeal = true;
+    GAME.bigDealQueue.push({ symbol, ts: GAME.gameMinute, name: tpl.name });
+    showToast(`🚀 ${tpl.name} just launched`, "success");
+  }
+  updateLaunchesBadge();
+}
+
+function maybeFireNews() {
+  if (Math.random() < 0.18) {
+    const totalWeight = NEWS_EVENTS.reduce((s, n) => s + n.weight, 0);
+    let r = Math.random() * totalWeight;
+    let selected = NEWS_EVENTS[0];
+    for (const news of NEWS_EVENTS) {
+      r -= news.weight;
+      if (r <= 0) { selected = news; break; }
+    }
+    applyNewsImpact(selected);
+    GAME.currentNews = selected;
+    GAME.newsHistory.push({ ...selected, ts: GAME.gameMinute });
+    updateNewsTicker();
+  }
+}
+
+function updateNewsTicker() {
+  const el = document.getElementById("news-content");
+  if (GAME.currentNews) {
+    el.textContent = GAME.currentNews.text;
+    el.style.opacity = "1";
+    setTimeout(() => {
+      if (GAME.currentNews && el.textContent === GAME.currentNews.text) {
+        el.style.opacity = "0.5";
+      }
+    }, 8000);
+  }
+}
+
+function walletTotalValue() {
+  let total = GAME.walletDAI;
+  for (const id in GAME.positions) {
+    const amount = GAME.positions[id];
+    if (amount > 0 && ASSETS[id]) total += amount * ASSETS[id].price;
+  }
+  return total;
+}
+
+function get1hChange(id) {
+  const hist = PRICE_HISTORY[id] || [];
+  if (hist.length < 2) return 0;
+  const oneHourAgoTick = Math.max(0, GAME.ticks - 2);
+  const past = hist.find(p => p.t >= oneHourAgoTick) || hist[0];
+  const now = hist[hist.length - 1];
+  if (!past || !now || past.price === 0) return 0;
+  return ((now.price - past.price) / past.price) * 100;
+}
+
+function getSparklinePath(id) {
+  const hist = PRICE_HISTORY[id] || [];
+  if (hist.length < 2) return "0,14 60,14";
+  const slice = hist.slice(-15);
+  const prices = slice.map(p => p.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+  return slice.map((p, i) => {
+    const x = (i / (slice.length - 1)) * 60;
+    const y = 26 - ((p.price - min) / range) * 24;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function getSparkColor(id) {
+  const change = get1hChange(id);
+  if (change > 0.1) return "#16a34a";
+  if (change < -0.1) return "#dc2626";
+  return "#6b7280";
+}
+
+function renderMarkets() {
+  const container = document.getElementById("tab-markets");
+  const blueChips = STATIC_ASSETS.map(a => ASSETS[a.id]);
+  const dynamic = Object.values(ASSETS).filter(a => !a.isStatic && !a.rugged).sort((a, b) => {
+    if (a.justLaunched && !b.justLaunched) return -1;
+    if (!a.justLaunched && b.justLaunched) return 1;
+    return 0;
+  });
+  let html = `<div class="section-label">BLUE CHIPS</div>`;
+  html += blueChips.map(a => assetRowHtml(a)).join("");
+  if (dynamic.length > 0) {
+    html += `<div class="section-label">DYNAMIC · ${dynamic.length} ASSETS</div>`;
+    html += dynamic.map(a => assetRowHtml(a)).join("");
+  }
+  container.innerHTML = html;
+  container.querySelectorAll(".asset-row").forEach(row => {
+    row.addEventListener("click", () => openDetail(row.dataset.id));
+  });
+}
+
+function assetRowHtml(a) {
+  const change = get1hChange(a.id);
+  const pctClass = change > 0.1 ? "pct-up" : change < -0.1 ? "pct-down" : "pct-flat";
+  const sparkColor = getSparkColor(a.id);
+  const sparkPath = getSparklinePath(a.id);
+  let badge = "";
+  if (a.isMorbius) badge = `<span class="badge badge-real">real</span>`;
+  else if (a.justLaunched) badge = `<span class="badge badge-new">new</span>`;
+  else if (a.hot) badge = `<span class="badge badge-hot">hot</span>`;
+  const age = getAge(a);
+  const ageStr = age !== null ? ` · ${fmtAge(age)}` : "";
+  return `<div class="asset-row" data-id="${a.id}">
+    <div class="asset-icon" style="background:${a.color};">${a.emoji}</div>
+    <div class="asset-info">
+      <p class="asset-name">${a.name} ${badge}</p>
+      <p class="asset-meta">${a.symbol} · ${a.desc}${ageStr}</p>
+    </div>
+    <svg class="asset-spark" viewBox="0 0 60 28">
+      <polyline points="${sparkPath}" fill="none" stroke="${sparkColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="asset-price">
+      <p class="price-num">${fmtPrice(a.price)}</p>
+      <p class="price-pct ${pctClass}">${fmtPct(change)}</p>
+    </div>
+  </div>`;
+}
+
+function renderPortfolio() {
+  const container = document.getElementById("tab-portfolio");
+  const total = walletTotalValue();
+  const pnl = total - GAME.walletStartValue;
+  const pnlPct = (pnl / GAME.walletStartValue) * 100;
+  const pnlClass = pnl >= 0 ? "pct-up" : "pct-down";
+  const holdings = [];
+  if (GAME.walletDAI > 0.01) holdings.push({ id: "DAI_CASH", asset: ASSETS["DAI"], amount: GAME.walletDAI, value: GAME.walletDAI, isCash: true });
+  for (const id in GAME.positions) {
+    const amount = GAME.positions[id];
+    if (amount > 0 && ASSETS[id]) {
+      const value = amount * ASSETS[id].price;
+      const cost = GAME.costBasis[id] || 0;
+      holdings.push({ id, asset: ASSETS[id], amount, value, cost, unrealized: value - cost });
+    }
+  }
+  holdings.sort((a, b) => b.value - a.value);
+  let allocations = "";
+  holdings.forEach(h => {
+    const pct = (h.value / total) * 100;
+    if (pct > 0.5) allocations += `<div class="allocation-seg" style="width:${pct}%;background:${h.asset.color};"></div>`;
+  });
+  let html = `<div class="portfolio-summary">
+    <p style="font-size:11px;color:#6b7280;margin:0;font-weight:600;letter-spacing:0.04em;">TOTAL VALUE</p>
+    <p class="portfolio-total">${fmtUSD(total)}</p>
+    <p class="portfolio-pnl ${pnlClass}">${pnl >= 0 ? "+" : ""}${fmtUSD(Math.abs(pnl))} · ${fmtPct(pnlPct)}</p>
+    <div class="allocation-bar">${allocations}</div>
+  </div>`;
+  html += `<div class="section-label">YOUR HOLDINGS · ${holdings.length}</div>`;
+  if (holdings.length === 0) {
+    html += `<div class="empty-state"><div class="icon">💼</div><div class="text">no positions yet</div></div>`;
+  } else {
+    holdings.forEach(h => {
+      const a = h.asset;
+      const pct = ((h.value / total) * 100).toFixed(1);
+      let metaSub = "";
+      if (h.isCash) metaSub = `${fmtAmount(h.amount)} DAI · ${pct}%`;
+      else metaSub = `${fmtAmount(h.amount)} ${a.symbol} · ${pct}%`;
+      let pnlLine = "";
+      if (!h.isCash && h.unrealized !== undefined) {
+        const upClass = h.unrealized >= 0 ? "pct-up" : "pct-down";
+        pnlLine = `<p class="price-pct ${upClass}">${h.unrealized >= 0 ? "+" : ""}${fmtUSD(Math.abs(h.unrealized))}</p>`;
+      } else {
+        pnlLine = `<p class="price-pct pct-flat">cash</p>`;
+      }
+      html += `<div class="asset-row" data-id="${h.isCash ? "DAI" : h.id}">
+        <div class="asset-icon" style="background:${a.color};">${a.emoji}</div>
+        <div class="asset-info">
+          <p class="asset-name">${a.name}</p>
+          <p class="asset-meta">${metaSub}</p>
+        </div>
+        <div class="asset-price">
+          <p class="price-num">${fmtUSD(h.value)}</p>
+          ${pnlLine}
+        </div>
+      </div>`;
+    });
+  }
+  container.innerHTML = html;
+  container.querySelectorAll(".asset-row").forEach(row => {
+    row.addEventListener("click", () => openDetail(row.dataset.id));
+  });
+}
+
+function renderLaunches() {
+  const container = document.getElementById("tab-launches");
+  const launches = Object.values(ASSETS)
+    .filter(a => !a.isStatic && !a.rugged && a.launchedAtGameMinute !== undefined)
+    .sort((a, b) => b.launchedAtGameMinute - a.launchedAtGameMinute);
+  let html = "";
+  if (GAME.bigDealQueue.length > 0) {
+    const latest = GAME.bigDealQueue[GAME.bigDealQueue.length - 1];
+    const asset = ASSETS[latest.symbol];
+    if (asset) {
+      const isMorb = asset.isMorbius;
+      html += `<div class="launch-banner ${isMorb ? "morbius" : ""}">
+        <p class="launch-banner-label">${isMorb ? "REAL PROJECT · JUST LAUNCHED" : "BIG DEAL LAUNCH"}</p>
+        <p class="launch-banner-title">$${asset.symbol} · ${asset.name}</p>
+        <p class="launch-banner-desc">${asset.desc}</p>
+      </div>`;
+    }
+  }
+  if (launches.length === 0) {
+    html += `<div class="empty-state"><div class="icon">🚀</div><div class="text">no launches yet · check back as time passes</div></div>`;
+  } else {
+    launches.forEach(a => {
+      html += assetRowHtml(a);
+    });
+  }
+  container.innerHTML = html;
+  container.querySelectorAll(".asset-row").forEach(row => {
+    row.addEventListener("click", () => openDetail(row.dataset.id));
+  });
+}
+
+function renderRugged() {
+  const container = document.getElementById("tab-rugged");
+  if (GAME.rugged.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">💀</div><div class="text">no rugs yet · the world is young</div></div>`;
+    return;
+  }
+  const hits = GAME.rugged.filter(r => r.youHeld).length;
+  const dodged = GAME.rugged.length - hits;
+  const totalSaved = GAME.rugged.filter(r => !r.youHeld).reduce((s, r) => s + r.peakPrice * 100, 0);
+  let html = `<div style="padding:14px 18px;background:#fff;border-bottom:0.5px solid #e5e7eb;">
+    <p style="font-size:11px;color:#6b7280;margin:0;font-weight:600;letter-spacing:0.04em;">GRAVEYARD STATS</p>
+    <p style="font-size:14px;color:#111;margin:6px 0 0;font-weight:600;">${GAME.rugged.length} rugs · hit ${hits} · dodged ${dodged}</p>
+  </div>`;
+  html += GAME.rugged.slice().reverse().map(r => {
+    let summary = "";
+    if (r.youHeld) summary = `<div class="rugged-summary hit"><span>you got hit</span><span>-${fmtUSD(r.loss)}</span></div>`;
+    else summary = `<div class="rugged-summary dodged"><span>you dodged ✓</span><span>good call</span></div>`;
+    const lifespanStr = r.lifespan ? fmtDuration(r.lifespan) : "—";
+    return `<div class="rugged-row">
+      <div style="display:flex;gap:10px;">
+        <div class="asset-icon" style="background:#374151;width:34px;height:34px;font-size:13px;">${r.emoji}</div>
+        <div style="flex:1;min-width:0;">
+          <p style="font-size:13px;font-weight:600;margin:0;">$${r.symbol} <span class="badge badge-rugged">rugged</span></p>
+          <p style="font-size:11px;color:#6b7280;margin:1px 0 0;">lasted ${lifespanStr} · peak ${fmtPrice(r.peakPrice)}</p>
+        </div>
+      </div>
+      ${summary}
+    </div>`;
+  }).join("");
+  container.innerHTML = html;
+}
+
+function updateLaunchesBadge() {
+  const newCount = Object.values(ASSETS).filter(a => !a.isStatic && !a.rugged && a.justLaunched).length;
+  const badge = document.getElementById("launches-badge");
+  if (newCount > 0) {
+    badge.textContent = newCount;
+    badge.style.display = "inline-block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function openDetail(id) {
+  const a = ASSETS[id];
+  if (!a) return;
+  if (a.justLaunched) a.justLaunched = false;
+  updateLaunchesBadge();
+  GAME.selectedAsset = id;
+  document.getElementById("detail-icon").textContent = a.emoji;
+  document.getElementById("detail-icon").style.background = a.color;
+  document.getElementById("detail-name").textContent = `${a.name} · ${a.symbol}`;
+  const age = getAge(a);
+  const ageBit = age !== null ? ` · ${fmtAge(age)}` : "";
+  const realBit = a.isMorbius ? " · real token" : "";
+  document.getElementById("detail-sub").textContent = a.desc + ageBit + realBit;
+  renderDetailContent();
+  document.getElementById("detail-view").classList.add("open");
+}
+
+function renderDetailContent() {
+  const a = ASSETS[GAME.selectedAsset];
+  if (!a) return;
+  const age = getAge(a);
+  const ageBit = age !== null ? ` · ${fmtAge(age)}` : "";
+  const realBit = a.isMorbius ? " · real token" : "";
+  document.getElementById("detail-sub").textContent = a.desc + ageBit + realBit;
+  const change = get1hChange(a.id);
+  const pctClass = change > 0.1 ? "pct-up" : change < -0.1 ? "pct-down" : "pct-flat";
+  document.getElementById("detail-price").textContent = fmtPrice(a.price);
+  document.getElementById("detail-change").className = "detail-change " + pctClass;
+  document.getElementById("detail-change").textContent = `${fmtPct(change)} · last hour`;
+  drawChart();
+  const heldAmount = GAME.positions[a.id] || 0;
+  const positionArea = document.getElementById("detail-position-area");
+  if (heldAmount > 0) {
+    const value = heldAmount * a.price;
+    const cost = GAME.costBasis[a.id] || 0;
+    const pnl = value - cost;
+    const pnlClass = pnl >= 0 ? "pct-up" : "pct-down";
+    positionArea.innerHTML = `<div class="position-box">
+      <p class="position-label">YOUR POSITION</p>
+      <div class="position-row"><span class="key">amount</span><span class="val">${fmtAmount(heldAmount)} ${a.symbol}</span></div>
+      <div class="position-row"><span class="key">value</span><span class="val">${fmtUSD(value)}</span></div>
+      <div class="position-row"><span class="key">cost basis</span><span class="val">${fmtUSD(cost)}</span></div>
+      <p class="position-pnl ${pnlClass}">${pnl >= 0 ? "+" : ""}${fmtUSD(Math.abs(pnl))} unrealized</p>
+    </div>`;
+  } else {
+    positionArea.innerHTML = `<div class="position-box">
+      <p class="position-label">YOUR POSITION</p>
+      <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">no position</p>
+    </div>`;
+  }
+  const warningArea = document.getElementById("detail-warning-area");
+  if (a.flags && a.flags.length > 0 && !a.isStatic) {
+    const goodFlags = a.flags.filter(f => f.includes("✓") || f.includes("doxxed") || f.includes("locked") || f.includes("complete") || f.includes("audit"));
+    const isGood = goodFlags.length >= a.flags.length / 2;
+    warningArea.innerHTML = `<div class="warning-box ${isGood ? "amber" : ""}">
+      <p class="title">${isGood ? "SOCIAL & CONTRACT INFO" : "⚠ RED FLAGS"}</p>
+      <p class="body">${a.flags.join(" · ")}</p>
+    </div>`;
+  } else {
+    warningArea.innerHTML = "";
+  }
+  const investigateArea = document.getElementById("detail-investigate-area");
+  if (a.investigate) {
+    investigateArea.innerHTML = `<div class="investigate-section">
+      <p class="position-label">INVESTIGATE (coming soon — phone integration)</p>
+      <div class="investigate-grid">
+        <button class="investigate-btn inv-tg">📨 Telegram</button>
+        <button class="investigate-btn inv-x">𝕏 X Profile</button>
+        <button class="investigate-btn inv-contract">{ } Contract</button>
+        <button class="investigate-btn inv-holders">👥 Holders</button>
+      </div>
+    </div>`;
+  } else {
+    investigateArea.innerHTML = "";
+  }
+  document.getElementById("btn-sell").disabled = heldAmount <= 0;
+  if (a.id === "DAI") {
+    document.getElementById("btn-sell").style.display = "none";
+    document.getElementById("btn-buy").style.display = "none";
+  } else {
+    document.getElementById("btn-sell").style.display = "";
+    document.getElementById("btn-buy").style.display = "";
+  }
+}
+
+function drawChart() {
+  const a = ASSETS[GAME.selectedAsset];
+  if (!a) return;
+  const hist = PRICE_HISTORY[a.id] || [];
+  let ticksBack = 10;
+  if (GAME.selectedTimeframe === "1H") ticksBack = 2;
+  else if (GAME.selectedTimeframe === "4H") ticksBack = 8;
+  else if (GAME.selectedTimeframe === "24H") ticksBack = 48;
+  else if (GAME.selectedTimeframe === "ALL") ticksBack = hist.length;
+  const slice = hist.slice(-ticksBack);
+  const labels = slice.map((_, i) => i);
+  const data = slice.map(p => p.price);
+  const ctx = document.getElementById("price-chart").getContext("2d");
+  if (GAME.chart) GAME.chart.destroy();
+  const lineColor = data.length > 1 && data[data.length - 1] >= data[0] ? "#16a34a" : "#dc2626";
+  const fillColor = lineColor + "20";
+  GAME.chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data, borderColor: lineColor, backgroundColor: fillColor,
+        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false, grace: "5%" }
+      },
+      elements: { line: { borderJoinStyle: "round" } }
+    }
+  });
+}
+
+function closeDetail() {
+  document.getElementById("detail-view").classList.remove("open");
+  GAME.selectedAsset = null;
+  if (GAME.chart) { GAME.chart.destroy(); GAME.chart = null; }
+}
+
+function openTradeModal(mode) {
+  GAME.tradeMode = mode;
+  const a = ASSETS[GAME.selectedAsset];
+  if (!a) return;
+  document.getElementById("modal-icon").textContent = a.emoji;
+  document.getElementById("modal-icon").style.background = a.color;
+  document.getElementById("modal-title").textContent = `${mode === "buy" ? "Buy" : "Sell"} ${a.name}`;
+  document.getElementById("modal-sub").textContent = `1 ${a.symbol} = ${fmtPrice(a.price)}`;
+  document.getElementById("pay-input").value = "";
+  if (mode === "buy") {
+    document.getElementById("pay-balance").textContent = `balance: ${fmtUSD(GAME.walletDAI)} DAI`;
+    document.querySelector(".pay-amount-row span").style.display = "";
+    document.getElementById("modal-confirm").textContent = "Confirm Buy";
+    document.getElementById("modal-confirm").className = "modal-confirm buy";
+  } else {
+    const held = GAME.positions[a.id] || 0;
+    document.getElementById("pay-balance").textContent = `balance: ${fmtAmount(held)} ${a.symbol}`;
+    document.querySelector(".pay-amount-row span").textContent = "";
+    document.querySelector(".pay-amount-row span").style.display = "none";
+    document.getElementById("modal-confirm").textContent = "Confirm Sell";
+    document.getElementById("modal-confirm").className = "modal-confirm sell";
+  }
+  updateReceivePreview();
+  document.getElementById("modal-backdrop").classList.add("open");
+}
+
+function updateReceivePreview() {
+  const a = ASSETS[GAME.selectedAsset];
+  if (!a) return;
+  const input = parseFloat(document.getElementById("pay-input").value) || 0;
+  if (GAME.tradeMode === "buy") {
+    const amount = a.price > 0 ? input / a.price : 0;
+    document.getElementById("receive-amount").textContent = `${fmtAmount(amount)} ${a.symbol}`;
+  } else {
+    const proceeds = input * a.price;
+    document.getElementById("receive-amount").textContent = `${fmtUSD(proceeds)} DAI`;
+  }
+}
+
+function closeTradeModal() {
+  document.getElementById("modal-backdrop").classList.remove("open");
+}
+
+function executeTrade() {
+  const a = ASSETS[GAME.selectedAsset];
+  if (!a) return;
+  const input = parseFloat(document.getElementById("pay-input").value) || 0;
+  if (input <= 0) { showToast("enter an amount", "error"); return; }
+  if (GAME.tradeMode === "buy") {
+    if (input > GAME.walletDAI + 0.001) { showToast("insufficient DAI", "error"); return; }
+    const amount = input / a.price;
+    GAME.walletDAI -= input;
+    GAME.positions[a.id] = (GAME.positions[a.id] || 0) + amount;
+    GAME.costBasis[a.id] = (GAME.costBasis[a.id] || 0) + input;
+    GAME.trades.push({ ts: GAME.gameMinute, type: "buy", asset: a.id, amount, price: a.price, value: input });
+    showToast(`bought ${fmtAmount(amount)} ${a.symbol}`, "success");
+  } else {
+    const held = GAME.positions[a.id] || 0;
+    if (input > held + 0.00000001) { showToast(`insufficient ${a.symbol}`, "error"); return; }
+    const proceeds = input * a.price;
+    GAME.walletDAI += proceeds;
+    GAME.positions[a.id] -= input;
+    const avgCost = held > 0 ? (GAME.costBasis[a.id] || 0) / held : 0;
+    GAME.costBasis[a.id] = Math.max(0, (GAME.costBasis[a.id] || 0) - avgCost * input);
+    if (GAME.positions[a.id] < 0.00000001) {
+      delete GAME.positions[a.id];
+      delete GAME.costBasis[a.id];
+    }
+    GAME.trades.push({ ts: GAME.gameMinute, type: "sell", asset: a.id, amount: input, price: a.price, value: proceeds });
+    showToast(`sold ${fmtAmount(input)} ${a.symbol}`, "success");
+  }
+  closeTradeModal();
+  renderDetailContent();
+  updateHUD();
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + (type || "");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+function updateHUD() {
+  const totalVal = walletTotalValue();
+  const bagFormatted = fmtUSD(totalVal);
+  const clockFormatted = fmtGameTime();
+  const sbTime = getMinuteOfDay().replace(" AM", "a").replace(" PM", "p");
+  const inCoinhubBag = document.getElementById("bag-value");
+  const inCoinhubClock = document.getElementById("game-clock");
+  if (inCoinhubBag) inCoinhubBag.textContent = bagFormatted;
+  if (inCoinhubClock) inCoinhubClock.textContent = clockFormatted;
+  const sbTimeEl = document.getElementById("sb-time");
+  if (sbTimeEl) sbTimeEl.textContent = sbTime;
+  const hudBagVal = document.getElementById("hud-bag-val");
+  if (hudBagVal) {
+    hudBagVal.textContent = bagFormatted;
+    hudBagVal.className = totalVal >= GAME.walletStartValue ? "val val-up" : "val val-down";
+  }
+  const hudClockVal = document.getElementById("hud-clock-val");
+  if (hudClockVal) {
+    const day = Math.floor(GAME.gameMinute / (24 * 60)) + 1;
+    hudClockVal.textContent = `D${day} · ${sbTime}`;
+  }
+  applyTheme();
+}
+
+function gameTick() {
+  GAME.ticks++;
+  GAME.gameMinute += GAME.gameMinutesPerTick;
+  tickPrices();
+  maybeFireNews();
+  if (GAME.ticks >= nextLaunchTick) {
+    launchNewToken();
+    nextLaunchTick = GAME.ticks + Math.floor(Math.random() * 4) + 3;
+  }
+  updateHUD();
+  if (GAME.currentTab === "markets") renderMarkets();
+  else if (GAME.currentTab === "portfolio") renderPortfolio();
+  else if (GAME.currentTab === "launches") renderLaunches();
+  else if (GAME.currentTab === "rugged") renderRugged();
+  if (GAME.selectedAsset && document.getElementById("detail-view").classList.contains("open")) {
+    renderDetailContent();
+  }
+}
+
+function switchTab(tab) {
+  GAME.currentTab = tab;
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  document.querySelectorAll(".tab-item").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+  document.getElementById("tab-" + tab).style.display = "";
+  if (tab === "markets") renderMarkets();
+  else if (tab === "portfolio") renderPortfolio();
+  else if (tab === "launches") renderLaunches();
+  else if (tab === "rugged") renderRugged();
+}
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => switchTab(t.dataset.tab));
+});
+document.querySelectorAll(".tab-item").forEach(t => {
+  t.addEventListener("click", () => switchTab(t.dataset.tab));
+});
+document.getElementById("back-btn").addEventListener("click", closeDetail);
+document.getElementById("btn-buy").addEventListener("click", () => openTradeModal("buy"));
+document.getElementById("btn-sell").addEventListener("click", () => openTradeModal("sell"));
+document.getElementById("modal-cancel").addEventListener("click", closeTradeModal);
+document.getElementById("modal-confirm").addEventListener("click", executeTrade);
+document.getElementById("pay-input").addEventListener("input", updateReceivePreview);
+document.querySelectorAll(".pct-btn").forEach(b => {
+  b.addEventListener("click", () => {
+    const pct = parseFloat(b.dataset.pct);
+    const a = ASSETS[GAME.selectedAsset];
+    if (!a) return;
+    if (GAME.tradeMode === "buy") {
+      document.getElementById("pay-input").value = (GAME.walletDAI * pct).toFixed(2);
+    } else {
+      const held = GAME.positions[a.id] || 0;
+      document.getElementById("pay-input").value = (held * pct).toFixed(8);
+    }
+    updateReceivePreview();
+  });
+});
+document.querySelectorAll(".tf-tab").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".tf-tab").forEach(t => t.classList.remove("active"));
+    b.classList.add("active");
+    GAME.selectedTimeframe = b.dataset.tf;
+    drawChart();
+  });
+});
+document.getElementById("news-ticker").addEventListener("click", () => {
+  if (GAME.currentNews) showToast(GAME.currentNews.text, "");
+});
+
+
+// ============================================================
+// ICON SYSTEM — inline SVG, no CDN font dependency
+// ============================================================
+
+const ICONS = {
+  "ti-wallet": '<path d="M17 8V7a2 2 0 0 0 -2 -2H5a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-1"/><path d="M20 12v4h-4a2 2 0 0 1 0 -4h4"/>',
+  "ti-chart-candle": '<path d="M4 6l0 4"/><path d="M4 14l0 6"/><path d="M10 10l0 6"/><path d="M2 10l4 0"/><path d="M8 10l4 0"/><path d="M14 6l0 12"/><path d="M16 8l-4 0"/><path d="M16 16l-4 0"/><path d="M20 4l0 4"/><path d="M20 12l0 8"/><path d="M22 8l-4 0"/>',
+  "ti-brand-x": '<path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/>',
+  "ti-brand-telegram": '<path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4"/>',
+  "ti-brand-discord": '<path d="M8 12a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M14 12a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M15.5 17c0 1 1.5 3 2 3c1.5 0 2.833 -1.667 3.5 -3c.667 -1.667 .5 -5.833 -1.5 -11.5c-1.457 -1.015 -3 -1.34 -4.5 -1.5l-1 2.5"/><path d="M7 16.5c-1.5 0 -2.5 -.5 -3 -1c-.667 -1.5 -.667 -5.833 1.5 -11.5c1.457 -1.015 3 -1.34 4.5 -1.5l1 2.5"/><path d="M7 16.5c3.5 1 6.5 1 10 0"/>',
+  "ti-message-circle": '<path d="M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1"/>',
+  "ti-mail": '<path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z"/><path d="M3 7l9 6l9 -6"/>',
+  "ti-settings": '<path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>',
+  "ti-chevron-left": '<path d="M15 6l-6 6l6 6"/>',
+  "ti-chevron-right": '<path d="M9 6l6 6l-6 6"/>',
+  "ti-signal-4g": '<path d="M3 18.5h18"/><path d="M3 14l1.5 -4.5l1.5 4.5"/><path d="M3.5 13h2"/><path d="M14 9.5v3a1 1 0 0 0 1 1h1v-2"/><path d="M9 9.5h2"/><path d="M10 9.5v4"/><path d="M19 9.5h-2a1 1 0 0 0 -1 1v2a1 1 0 0 0 1 1h1.5a.5 .5 0 0 0 .5 -.5v-1a.5 .5 0 0 0 -.5 -.5h-.5"/>',
+  "ti-wifi": '<path d="M12 18l.01 0"/><path d="M9.172 15.172a4 4 0 0 1 5.656 0"/><path d="M6.343 12.343a8 8 0 0 1 11.314 0"/><path d="M3.515 9.515c4.686 -4.687 12.284 -4.687 17 0"/>',
+  "ti-battery-3": '<path d="M6 7h11a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-11a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2"/><path d="M7 10l0 4"/><path d="M10 10l0 4"/><path d="M13 10l0 4"/>',
+  "ti-photo": '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
+  "ti-moon": '<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>',
+  "ti-info-circle": '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/>',
+  "ti-volume": '<path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/>',
+  "ti-bell-ringing": '<path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/><path d="M21 6.727a11.05 11.05 0 0 0 -2.794 -3.727"/><path d="M3 6.727a11.05 11.05 0 0 1 2.792 -3.727"/>',
+  "ti-device-mobile": '<path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z"/><path d="M11 4h2"/><path d="M12 17v.01"/>',
+  "ti-refresh": '<path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>',
+  "ti-rocket": '<path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"/><path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"/><path d="M15 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+  "ti-skull": '<path d="M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5z"/><path d="M10 17v3"/><path d="M14 17v3"/><path d="M8 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M16 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+  "ti-tool": '<path d="M7 10h3v-3l-3.5 -3.5a6 6 0 0 1 8 8l6 6a2 2 0 0 1 -3 3l-6 -6a6 6 0 0 1 -8 -8l3.5 3.5"/>',
+  "ti-lock": '<path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M8 11v-4a4 4 0 1 1 8 0v4"/>',
+  "ti-search": '<path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/>',
+  "ti-bell": '<path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/>',
+  "ti-circle-filled": '<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
+  "ti-heart": '<path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/>',
+  "ti-share": '<path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M8.7 10.7l6.6 -3.4"/><path d="M8.7 13.3l6.6 3.4"/>',
+};
+
+function renderIcons(root) {
+  const scope = root || document;
+  scope.querySelectorAll("i.ti").forEach(el => {
+    if (el.dataset.iconRendered === "1") return;
+    const classList = Array.from(el.classList);
+    const iconClass = classList.find(c => c.startsWith("ti-"));
+    if (!iconClass) return;
+    const svgInner = ICONS[iconClass];
+    if (!svgInner) {
+      el.innerHTML = "";
+      return;
+    }
+    el.innerHTML = `<svg viewBox="0 0 24 24">${svgInner}</svg>`;
+    el.dataset.iconRendered = "1";
+  });
+}
+
+const _iconObserver = new MutationObserver(muts => {
+  for (const m of muts) {
+    if (m.addedNodes && m.addedNodes.length) {
+      renderIcons(m.target);
+    }
+  }
+});
+_iconObserver.observe(document.body, { childList: true, subtree: true });
+renderIcons();
+
+
+// ============================================================
+// PHONE SHELL — home screen, app routing, theme, settings
+// ============================================================
+
+const SHELL = {
+  currentApp: null,
+  themeMode: "auto",
+  wallpaper: "sunset",
+  hudStyle: "translucent",
+  currentTheme: "light",
+};
+
+const APPS = [
+  { id: "metapocket", name: "MetaPocket", icon: "ti-wallet", color: "#f6851b", built: false, badge: 0, desc: "your wallet — holds tokens, signs transactions, manages connected sites" },
+  { id: "coinhub", name: "CoinHub", icon: "ti-chart-candle", color: "#0052ff", built: true, badge: 0, desc: "" },
+  { id: "x", name: "X", icon: "ti-brand-x", color: "#000", builtDark: "#1c1c1e", built: true, badge: 9, desc: "social feed where news breaks, hype spreads, and scams thrive" },
+  { id: "telegram", name: "Telegram", icon: "ti-brand-telegram", color: "#29a9eb", built: false, badge: 3, desc: "group chats per token, DMs, and the duplicate channels you have to spot" },
+  { id: "discord", name: "Discord", icon: "ti-brand-discord", color: "#5865f2", built: false, badge: 1, desc: "community servers, mod channels, and impersonator DMs" },
+  { id: "messages", name: "Messages", icon: "ti-message-circle", color: "#34c759", built: false, badge: 2, desc: "iMessage-style threads with your closest friends — and the occasional hijacked account" },
+  { id: "mail", name: "Mail", icon: "ti-mail", color: "#1d9bf0", built: false, badge: 0, desc: "where phishing emails live — fake exchange notices, fake wallet alerts, the works" },
+  { id: "settings", name: "Settings", icon: "ti-settings", color: "#6b7280", builtDark: "#3f3f46", built: true, badge: 0, desc: "" },
+];
+
+const WALLPAPERS = [
+  { id: "sunset", name: "Sunset", lightName: false },
+  { id: "ocean", name: "Ocean", lightName: false },
+  { id: "charcoal", name: "Charcoal", lightName: true },
+  { id: "lavender", name: "Lavender", lightName: false },
+  { id: "matrix", name: "Matrix", lightName: true },
+];
+
+function renderHomeGrid() {
+  const grid = document.getElementById("home-grid");
+  grid.innerHTML = APPS.map(app => {
+    const badge = app.badge > 0 ? `<span class="home-app-badge">${app.badge > 9 ? "9+" : app.badge}</span>` : "";
+    const builtClass = app.built ? "built" : "";
+    const color = (SHELL.currentTheme === "dark" && app.builtDark) ? app.builtDark : app.color;
+    return `<div class="home-app" data-app-id="${app.id}">
+      <div class="home-app-icon ${builtClass}" style="background:${color};">
+        <i class="ti ${app.icon}" aria-hidden="true"></i>
+        ${badge}
+      </div>
+      <p class="home-app-name">${app.name}</p>
+    </div>`;
+  }).join("");
+  grid.querySelectorAll(".home-app").forEach(el => {
+    el.addEventListener("click", () => openApp(el.dataset.appId));
+  });
+  renderIcons(grid);
+}
+
+function openApp(appId) {
+  const app = APPS.find(a => a.id === appId);
+  if (!app) return;
+  SHELL.currentApp = appId;
+  document.getElementById("home-screen").classList.add("hidden");
+  document.getElementById("app-stage").classList.add("open");
+  document.querySelectorAll(".app-window").forEach(w => w.classList.remove("active"));
+  if (appId === "coinhub") {
+    document.getElementById("window-coinhub").classList.add("active");
+    renderMarkets();
+    updateHUD();
+  } else if (appId === "settings") {
+    document.getElementById("window-settings").classList.add("active");
+    showSettingsList();
+    renderSettingsValues();
+  } else if (appId === "x") {
+    document.getElementById("window-x").classList.add("active");
+    X.opened();
+  } else {
+    document.getElementById("window-placeholder").classList.add("active");
+    document.getElementById("placeholder-title").textContent = app.name;
+    document.getElementById("placeholder-sub").textContent = app.desc || "this app is in development. check back as the game grows.";
+  }
+}
+
+function goHome() {
+  SHELL.currentApp = null;
+  document.getElementById("home-screen").classList.remove("hidden");
+  document.getElementById("app-stage").classList.remove("open");
+  closeDetail();
+  closeTradeModal();
+}
+
+function applyTheme() {
+  let theme = SHELL.themeMode;
+  if (theme === "auto") {
+    const hour = Math.floor((GAME.gameMinute % (24 * 60)) / 60);
+    theme = (hour >= 6 && hour < 19) ? "light" : "dark";
+  }
+  SHELL.currentTheme = theme;
+  const wp = document.getElementById("wallpaper");
+  wp.className = `wallpaper wp-${SHELL.wallpaper} theme-${theme}`;
+  document.getElementById("statusbar").className = `statusbar theme-${theme}`;
+  document.getElementById("home-indicator").className = `home-indicator theme-${theme}`;
+  document.querySelectorAll(".app-window").forEach(w => {
+    w.classList.remove("theme-light", "theme-dark");
+    w.classList.add(`theme-${theme}`);
+  });
+  document.querySelectorAll(".hud-pill").forEach(p => {
+    p.classList.remove("theme-light", "theme-dark");
+    p.classList.add(`theme-${theme}`);
+    if (SHELL.hudStyle === "solid") p.classList.add("solid");
+    else p.classList.remove("solid");
+  });
+  const homeAppNames = document.querySelectorAll(".home-app-name");
+  if (homeAppNames.length > 0) {
+    APPS.forEach((app, idx) => {
+      const icon = document.querySelectorAll(".home-app-icon")[idx];
+      if (icon) {
+        const color = (theme === "dark" && app.builtDark) ? app.builtDark : app.color;
+        icon.style.background = color;
+      }
+    });
+  }
+}
+
+function showSettingsList() {
+  document.getElementById("settings-scroll").style.display = "";
+  document.getElementById("wallpaper-picker").style.display = "none";
+}
+
+function showWallpaperPicker() {
+  document.getElementById("settings-scroll").style.display = "none";
+  document.getElementById("wallpaper-picker").style.display = "";
+  renderWallpaperGrid();
+}
+
+function renderWallpaperGrid() {
+  const grid = document.getElementById("wp-grid");
+  const theme = SHELL.currentTheme;
+  let html = WALLPAPERS.map(wp => {
+    const selected = wp.id === SHELL.wallpaper ? "selected" : "";
+    const lightName = wp.lightName ? "light-name" : "";
+    return `<div class="wp-swatch wp-${wp.id} theme-${theme} ${selected} ${lightName}" data-wp-id="${wp.id}">
+      <div class="wp-swatch-name">${wp.name}</div>
+    </div>`;
+  }).join("");
+  html += `<div class="wp-swatch-locked"><i class="ti ti-lock" aria-hidden="true"></i></div>`;
+  grid.innerHTML = html;
+  grid.querySelectorAll(".wp-swatch").forEach(el => {
+    el.addEventListener("click", () => {
+      SHELL.wallpaper = el.dataset.wpId;
+      applyTheme();
+      renderWallpaperGrid();
+      renderSettingsValues();
+    });
+  });
+}
+
+function renderSettingsValues() {
+  const wpName = WALLPAPERS.find(w => w.id === SHELL.wallpaper)?.name || "Sunset";
+  const wpEl = document.getElementById("settings-wp-name");
+  if (wpEl) wpEl.textContent = wpName;
+  const dmEl = document.getElementById("settings-dm-name");
+  if (dmEl) dmEl.textContent = SHELL.themeMode === "auto" ? "Auto" : (SHELL.themeMode === "dark" ? "Dark" : "Light");
+  const hudEl = document.getElementById("settings-hud-name");
+  if (hudEl) hudEl.textContent = SHELL.hudStyle === "translucent" ? "Translucent" : "Solid";
+}
+
+function cycleThemeMode() {
+  const modes = ["auto", "light", "dark"];
+  const cur = modes.indexOf(SHELL.themeMode);
+  SHELL.themeMode = modes[(cur + 1) % modes.length];
+  applyTheme();
+  renderSettingsValues();
+  showToast(`Dark mode: ${SHELL.themeMode}`, "");
+}
+
+function cycleHudStyle() {
+  SHELL.hudStyle = SHELL.hudStyle === "translucent" ? "solid" : "translucent";
+  applyTheme();
+  renderSettingsValues();
+  showToast(`HUD: ${SHELL.hudStyle}`, "");
+}
+
+function restartRun() {
+  if (!confirm("Restart your run? Your bag, positions, and progress will reset.")) return;
+  location.reload();
+}
+
+document.querySelectorAll("[data-go-home]").forEach(el => {
+  el.addEventListener("click", goHome);
+});
+document.querySelector('[data-settings-action="wallpaper"]').addEventListener("click", showWallpaperPicker);
+document.querySelector('[data-settings-action="dark-mode"]').addEventListener("click", cycleThemeMode);
+document.querySelector('[data-settings-action="hud-style"]').addEventListener("click", cycleHudStyle);
+document.getElementById("wp-picker-back").addEventListener("click", showSettingsList);
+document.getElementById("restart-run-btn").addEventListener("click", restartRun);
+document.querySelectorAll(".toggle").forEach(t => {
+  t.addEventListener("click", () => t.classList.toggle("off"));
+});
+
+
+// ============================================================
+// X APP — social feed, accounts, tweet engine, impersonators
+// ============================================================
+
+const X = {
+  feed: [],
+  lastTweetTick: 0,
+  nextTweetTick: 3,
+  lastOpenedAt: -999,
+  unreadCount: 0,
+  selectedTweet: null,
+  impersonatorCount: 0,
+  maxFeedLength: 50,
+};
+
+const X_ACCOUNTS = {
+  cryptodesk: {
+    handle: "cryptodesk",
+    name: "CryptoDesk",
+    verified: true,
+    avatarColor: "#fbbf24",
+    avatarChar: "C",
+  },
+  vitalik: {
+    handle: "VitalikButerin",
+    name: "vitalik.eth",
+    verified: true,
+    avatarColor: "#6366f1",
+    avatarChar: "V",
+  },
+  jenny: {
+    handle: "jenny_eth",
+    name: "Jenny",
+    verified: false,
+    avatarColor: "#f59e0b",
+    avatarChar: "J",
+  },
+  degen: {
+    handle: "DegenAnon420",
+    name: "DegenAnon420",
+    verified: false,
+    avatarColor: "#84cc16",
+    avatarChar: "D",
+  },
+  morbius: {
+    handle: "MorbiusFi",
+    name: "MorbiusFi",
+    verified: true,
+    avatarColor: "#7c3aed",
+    avatarChar: "M",
+  },
+};
+
+const X_TWEETS = {
+  jenny: [
+    "just hit my coffee order at the same bodega for the 3rd day in a row and i think i'm officially a New Yorker now",
+    "watching ETH consolidate while I drink my third coffee. it's going to be a long day",
+    "anyone else finding it harder to focus on real work since the bull run started? asking for me",
+    "small reminder that you don't have to ape every new launch. some days the right play is to sit out",
+    "dog wanted a walk at 6am. ETH was already up 2%. nature is healing.",
+    "honestly if you're not following crypto on weekends you're missing half the market action",
+    "shoutout to whoever made stablecoins. parking 10% of my bag there has saved me twice this month",
+    "tg admins asking for seed phrases in 2026. we are not the same.",
+    "lol my mom asked me what crypto she should buy. i told her DCA into BTC and SHE DID. proud of her",
+    "if your friend's text suddenly says 'bro you HAVE to ape this' in all caps... call them. on the phone. seriously.",
+  ],
+  degen: [
+    "PEPE2 chart looking parabolic 📈🚀🚀🚀 gonna leverage up on this one anons WAGMI 🐸",
+    "WHO ELSE IS LONG ETH RN 🚀🚀🚀",
+    "just aped 5 figures into a random dog coin let's see what happens 🐶",
+    "lambo or food stamps no in between 😎",
+    "ngmi if you sold your bags this morning 💀",
+    "DEGEN MODE ACTIVATED 🔥 see u in valhalla anons",
+    "wife told me to stop checking the chart. she doesn't know i have it open on my watch too",
+    "got rugged on $MOON yesterday. STILL aping the next one. this is the way 🫡",
+    "PEPE2 IS GOING TO ONE DOLLAR I CAN FEEL IT IN MY BONES",
+    "anyone else's cousin texting them about crypto? bull run confirmed",
+    "buying every dip until i'm broke or rich there is no in between",
+    "imagine selling. couldn't be me",
+  ],
+  vitalik: [
+    "reminder: I will never DM you. I will never run a giveaway. I will never ask for your seed phrase.",
+    "spent the weekend thinking about how much of crypto's risk surface is just bad UX. if signing a transaction looked scarier when it should be scarier, we'd lose less.",
+    "interesting paper on ZK rollup data availability today. link below.",
+    "the line between 'speculation' and 'innovation' in this space is blurrier than most people are comfortable admitting",
+    "if a project's marketing is more polished than their code, that's information",
+    "spent today coding. did not look at price. recommend it.",
+    "the most underrated skill in crypto is doing nothing for long stretches",
+  ],
+  cryptodesk: [
+    "BREAKING: Fed signals rate hike at upcoming meeting. Risk-off sentiment expected across crypto markets.",
+    "BREAKING: Spot BTC ETF sees record daily inflow. Institutional appetite continues.",
+    "DEVELOPING: Whale wallet moves 1,000 BTC to centralized exchange. Sell pressure speculation rising.",
+    "REGULATORY: Lawmakers signal increased scrutiny on memecoin sector. Memecoin token holders may face new disclosure requirements.",
+    "TECH: PulseChain developers ship major performance upgrade. Network throughput reportedly up 40%.",
+    "MARKETS: AI tokens lead daily gainers as sector hype climbs. Average AI token up 6.2% in 24h.",
+    "STABLECOIN: DAI maintains $1 peg through volatility stress test. Maker DAO governance praised.",
+    "DEFI: Total Value Locked across DeFi crosses new all-time high milestone.",
+    "MARKET: Memecoin sector showing renewed strength. Trading volume across category up 18% week-over-week.",
+    "EXCHANGE: New token listings announced across major exchanges. Volatility expected.",
+  ],
+  morbius: [
+    "$MORBIUS is live. Contract renounced, liquidity locked 12mo, 2 audits complete. Check it out on CoinHub.",
+    "We will never DM you first. We will never ask for your seed phrase. If anyone claiming to be MorbiusFi support contacts you privately, it's not us.",
+    "Reminder: 'support' accounts that DM you about your wallet are scammers. Every time. No exceptions.",
+    "Big thanks to early supporters. Genuinely humbled by the response since launch.",
+    "Working on the next milestone. Quiet build, not loud marketing. As always.",
+    "If you're new here: do your own research. Read the contract. Check the audits. Never invest more than you can lose.",
+  ],
+};
+
+const X_IMPERSONATOR_TEMPLATES = [
+  {
+    targetAccount: "vitalik",
+    fakeHandle: "Vit4l1k",
+    text: "🎁 To celebrate 10M followers I'm doing a special ETH giveaway. Send 0.1 ETH, receive 1 ETH back. First 100 only! eth-giveaway.live",
+    goldCheck: true,
+    difficulty: 1,
+  },
+  {
+    targetAccount: "vitalik",
+    fakeHandle: "VitalikButerin_",
+    text: "Surprise! Ethereum Foundation is doing a 10x ETH airdrop for early holders. Connect wallet to claim: eth-claim.app",
+    goldCheck: true,
+    difficulty: 2,
+  },
+  {
+    targetAccount: "morbius",
+    fakeHandle: "MorbiusFiSupport",
+    text: "Hey there! We detected unusual activity on your wallet. Please DM us with your seed phrase so we can secure your funds 🙏",
+    goldCheck: false,
+    difficulty: 2,
+  },
+  {
+    targetAccount: "cryptodesk",
+    fakeHandle: "crypt0desk",
+    text: "BREAKING: CoinHub announces $5,000 airdrop for all active users. Claim before midnight: coinhub-claim.site",
+    goldCheck: true,
+    difficulty: 3,
+  },
+  {
+    targetAccount: "vitalik",
+    fakeHandle: "VitalikButerin",
+    handleSubstitute: true,
+    text: "Quick test of a new mainnet feature. Send any amount of ETH to my address below and I'll match it 2x to help debug.",
+    goldCheck: true,
+    difficulty: 3,
+  },
+  {
+    targetAccount: "jenny",
+    fakeHandle: "jenny_ethh",
+    text: "yo bro my main got locked, lost access. use this link to claim a free 500 PEPE2 i'm sending out as a thank you to my followers: pepe-gift.live",
+    goldCheck: false,
+    difficulty: 2,
+  },
+];
+
+function xRand(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function xFmtTime(gameMinuteAge) {
+  if (gameMinuteAge < 1) return "now";
+  if (gameMinuteAge < 60) return `${Math.floor(gameMinuteAge)}m`;
+  const hours = Math.floor(gameMinuteAge / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+}
+
+function makeTweet(accountKey, text, opts) {
+  opts = opts || {};
+  const account = X_ACCOUNTS[accountKey];
+  return {
+    id: `t-${Date.now()}-${Math.floor(Math.random()*10000)}`,
+    accountKey,
+    handle: opts.fakeHandle || account.handle,
+    name: opts.fakeName || account.name,
+    verified: opts.goldCheck === true ? "gold" : (opts.fakeHandle ? false : account.verified),
+    avatarColor: account.avatarColor,
+    avatarChar: account.avatarChar,
+    text: text,
+    ts: GAME.gameMinute,
+    isImpersonator: opts.isImpersonator === true,
+    tag: opts.tag || null,
+    replies: Math.floor(Math.random() * 200) + 4,
+    retweets: Math.floor(Math.random() * 2000) + 8,
+    likes: Math.floor(Math.random() * 8000) + 30,
+  };
+}
+
+function xPushTweet(tweet) {
+  X.feed.unshift(tweet);
+  if (X.feed.length > X.maxFeedLength) X.feed.length = X.maxFeedLength;
+  if (SHELL.currentApp !== "x") {
+    X.unreadCount++;
+    updateXBadge();
+  }
+  if (SHELL.currentApp === "x" && document.getElementById("x-detail").style.display === "none") {
+    renderXFeed();
+  }
+}
+
+function xPostFromAccount(accountKey, customText) {
+  const text = customText || xRand(X_TWEETS[accountKey]);
+  const tweet = makeTweet(accountKey, text);
+  xPushTweet(tweet);
+}
+
+function xPostNews(newsText) {
+  const tweet = makeTweet("cryptodesk", newsText, { tag: "news" });
+  xPushTweet(tweet);
+}
+
+function xPostLaunch(symbol, name) {
+  const isMorbius = symbol === "MORB";
+  if (isMorbius) {
+    xPostFromAccount("morbius", `$MORBIUS is live. Contract renounced, liquidity locked 12mo, 2 audits complete. Check it out on CoinHub.`);
+  } else {
+    const tweet = makeTweet("cryptodesk", `LAUNCH: $${symbol} (${name}) just went live. Visit CoinHub Launches tab to investigate.`, { tag: "launch" });
+    xPushTweet(tweet);
+  }
+}
+
+function xMaybeSpawnImpersonator() {
+  const minDifficulty = 1;
+  const maxDifficulty = 1 + Math.floor(X.impersonatorCount / 2);
+  const eligible = X_IMPERSONATOR_TEMPLATES.filter(t => t.difficulty >= minDifficulty && t.difficulty <= maxDifficulty);
+  if (eligible.length === 0) return;
+  const tpl = xRand(eligible);
+  const target = X_ACCOUNTS[tpl.targetAccount];
+  const tweet = makeTweet(tpl.targetAccount, tpl.text, {
+    fakeHandle: tpl.fakeHandle,
+    fakeName: target.name,
+    goldCheck: tpl.goldCheck,
+    isImpersonator: true,
+  });
+  xPushTweet(tweet);
+  X.impersonatorCount++;
+}
+
+function xTickPost() {
+  if (GAME.ticks < X.nextTweetTick) return;
+  const weights = { jenny: 3, degen: 4, vitalik: 2, cryptodesk: 1, morbius: 1 };
+  const accounts = [];
+  for (const [key, w] of Object.entries(weights)) {
+    for (let i = 0; i < w; i++) accounts.push(key);
+  }
+  const accountKey = xRand(accounts);
+  xPostFromAccount(accountKey);
+  X.nextTweetTick = GAME.ticks + 1 + Math.floor(Math.random() * 2);
+  const dayHours = Math.floor(GAME.gameMinute / 60);
+  const sinceFirstImpersonator = X.impersonatorCount === 0 ? (dayHours >= 9 ? 1 : 0) : 1;
+  if (sinceFirstImpersonator > 0 && Math.random() < 0.08) {
+    xMaybeSpawnImpersonator();
+  }
+}
+
+function renderXFeed() {
+  const feedEl = document.getElementById("x-feed");
+  if (X.feed.length === 0) {
+    feedEl.innerHTML = `<div class="x-empty">no posts yet · wait a moment for the feed to load</div>`;
+    return;
+  }
+  const html = X.feed.map(t => {
+    const age = GAME.gameMinute - t.ts;
+    let verifyHtml = "";
+    if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
+    else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
+    return `<div class="x-tweet" data-tweet-id="${t.id}">
+      <div class="x-avatar" style="background:${t.avatarColor};">${t.avatarChar}</div>
+      <div class="x-body">
+        <div class="x-name-row">
+          <span class="x-name">${escapeHtml(t.name)}</span>
+          ${verifyHtml}
+          <span class="x-handle">@${escapeHtml(t.handle)}</span>
+          <span class="x-dot">·</span>
+          <span class="x-time">${xFmtTime(age)}</span>
+        </div>
+        <p class="x-text">${escapeHtml(t.text)}</p>
+        <div class="x-meta">
+          <span><i class="ti ti-message-circle" style="font-size:13px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
+          <span>🔁 ${formatK(t.retweets)}</span>
+          <span><i class="ti ti-heart" style="font-size:13px" aria-hidden="true"></i> ${formatK(t.likes)}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  feedEl.innerHTML = html;
+  feedEl.querySelectorAll(".x-tweet").forEach(el => {
+    el.addEventListener("click", () => openXDetail(el.dataset.tweetId));
+  });
+  renderIcons(feedEl);
+}
+
+function formatK(n) {
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(n);
+}
+
+function escapeHtml(str) {
+  return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function openXDetail(tweetId) {
+  const t = X.feed.find(x => x.id === tweetId);
+  if (!t) return;
+  X.selectedTweet = t;
+  document.getElementById("x-feed").style.display = "none";
+  document.getElementById("x-detail").style.display = "block";
+  let verifyHtml = "";
+  if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
+  else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
+  const age = GAME.gameMinute - t.ts;
+  const detail = document.getElementById("x-detail-content");
+  detail.innerHTML = `
+    <div class="x-detail-row">
+      <div class="x-avatar" style="background:${t.avatarColor};">${t.avatarChar}</div>
+      <div>
+        <div class="x-detail-name">${escapeHtml(t.name)} ${verifyHtml}</div>
+        <div class="x-detail-handle">@${escapeHtml(t.handle)}</div>
+      </div>
+    </div>
+    <p class="x-detail-text">${escapeHtml(t.text)}</p>
+    <p class="x-detail-time">${xFmtTime(age)} ago · ${formatK(t.likes * 10)} views</p>
+    <div class="x-detail-meta">
+      <span><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
+      <span>🔁 ${formatK(t.retweets)}</span>
+      <span><i class="ti ti-heart" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.likes)}</span>
+      <span><i class="ti ti-share" style="font-size:14px" aria-hidden="true"></i></span>
+    </div>
+  `;
+  renderIcons(detail);
+}
+
+function closeXDetail() {
+  document.getElementById("x-feed").style.display = "";
+  document.getElementById("x-detail").style.display = "none";
+  X.selectedTweet = null;
+}
+
+function updateXBadge() {
+  const xApp = APPS.find(a => a.id === "x");
+  if (!xApp) return;
+  xApp.badge = X.unreadCount;
+  if (SHELL.currentApp === null) renderHomeGrid();
+}
+
+X.opened = function() {
+  X.lastOpenedAt = GAME.gameMinute;
+  X.unreadCount = 0;
+  updateXBadge();
+  renderXFeed();
+  closeXDetail();
+};
+
+function xSeedFeed() {
+  const seedAccounts = ["jenny", "degen", "vitalik", "cryptodesk", "jenny", "degen", "vitalik", "morbius", "degen", "jenny"];
+  seedAccounts.forEach((accountKey, idx) => {
+    const minutesAgo = (seedAccounts.length - idx) * 18 + Math.floor(Math.random() * 12);
+    const text = xRand(X_TWEETS[accountKey]);
+    const tweet = makeTweet(accountKey, text);
+    tweet.ts = GAME.gameMinute - minutesAgo;
+    X.feed.push(tweet);
+  });
+  X.feed.sort((a, b) => b.ts - a.ts);
+  X.unreadCount = X.feed.length;
+}
+
+document.getElementById("x-detail-back").addEventListener("click", closeXDetail);
+
+const _originalGameTick = gameTick;
+gameTick = function() {
+  _originalGameTick();
+  xTickPost();
+};
+
+const _originalMaybeFireNews = maybeFireNews;
+maybeFireNews = function() {
+  const prevNews = GAME.currentNews;
+  _originalMaybeFireNews();
+  if (GAME.currentNews && GAME.currentNews !== prevNews) {
+    xPostNews(GAME.currentNews.text);
+  }
+};
+
+const _originalLaunchNewToken = launchNewToken;
+launchNewToken = function() {
+  const beforeIds = new Set(Object.keys(ASSETS));
+  _originalLaunchNewToken();
+  const newAssets = Object.values(ASSETS).filter(a => !a.isStatic && !beforeIds.has(a.id));
+  newAssets.forEach(a => {
+    if (a.isBigDeal) xPostLaunch(a.symbol, a.name);
+  });
+};
+
+
+renderHomeGrid();
+applyTheme();
+updateHUD();
+xSeedFeed();
+updateXBadge();
+setInterval(function() { gameTick(); }, GAME.tickRate);
+</script>
+
+</body>
+</html>
