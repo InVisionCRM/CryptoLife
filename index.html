@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CryptoLife — v0.2 alpha</title>
+<title>CryptoLife — v0.2.1 alpha</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -275,6 +275,175 @@
   }
   .theme-light .ph-msg-sub { color: #6b7280; }
   .theme-dark .ph-msg-sub { color: rgba(255,255,255,0.55); }
+  .placeholder-body.preview-mode {
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+    text-align: left;
+  }
+  .ph-preview-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+  .ph-preview-foot {
+    flex-shrink: 0;
+    padding: 10px 18px 24px;
+    font-size: 11px;
+    text-align: center;
+    opacity: 0.45;
+    border-top: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .theme-dark .ph-preview-foot { border-top-color: rgba(255,255,255,0.08); }
+  .ph-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    transition: background 0.4s ease;
+  }
+  .theme-dark .ph-row { border-bottom-color: rgba(255,255,255,0.06); }
+  .ph-row-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .ph-row-avatar.sq { border-radius: 12px; font-size: 16px; }
+  .ph-row-main { flex: 1; min-width: 0; }
+  .ph-row-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .theme-light .ph-row-title { color: #111; }
+  .theme-dark .ph-row-title { color: #fff; }
+  .ph-row-sub {
+    font-size: 12px;
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.55;
+  }
+  .ph-row-meta {
+    font-size: 11px;
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+  .ph-row-badge {
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 2px 6px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .ph-wallet-card {
+    margin: 14px;
+    padding: 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f6851b 0%, #e2761b 100%);
+    color: #fff;
+  }
+  .ph-wallet-label { font-size: 11px; opacity: 0.85; margin: 0; }
+  .ph-wallet-addr { font-size: 12px; font-family: ui-monospace, monospace; margin: 6px 0 0; opacity: 0.9; }
+  .ph-wallet-bal { font-size: 26px; font-weight: 600; margin: 12px 0 0; font-variant-numeric: tabular-nums; }
+  .ph-section-label {
+    padding: 12px 18px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.45;
+    text-transform: uppercase;
+  }
+  .ph-muted-pill {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  .detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .detail-stat {
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.04);
+  }
+  .theme-dark .detail-stat { background: rgba(255,255,255,0.06); }
+  .detail-stat .lbl { font-size: 10px; opacity: 0.5; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .detail-stat .val { font-size: 13px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+  .portfolio-activity {
+    margin: 0 14px 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.03);
+  }
+  .theme-dark .portfolio-activity { background: rgba(255,255,255,0.05); }
+  .portfolio-activity .act-label { font-size: 10px; opacity: 0.5; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .portfolio-activity .act-line { font-size: 12px; margin: 0 0 4px; opacity: 0.85; }
+  .portfolio-activity .act-line:last-child { margin-bottom: 0; }
+  .x-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+    vertical-align: 1px;
+  }
+  .x-tag.news { background: rgba(29, 155, 240, 0.15); color: #1d9bf0; }
+  .x-tag.launch { background: rgba(22, 163, 74, 0.15); color: #16a34a; }
+  .x-warn-box {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    font-size: 12px;
+    line-height: 1.45;
+    color: #dc2626;
+  }
+  .theme-dark .x-warn-box { color: #f87171; }
+  .changelog-panel {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .changelog-panel.open { display: flex; }
+  .changelog-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 18px 32px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .changelog-scroll h4 { font-size: 14px; margin: 16px 0 6px; }
+  .changelog-scroll h4:first-child { margin-top: 0; }
+  .changelog-scroll ul { margin: 0 0 8px; padding-left: 18px; opacity: 0.85; }
 
   .settings-scroll {
     flex: 1;
@@ -1384,9 +1553,9 @@
 <body>
 
 <div class="game-info">
-  <strong>CryptoLife · v0.2 alpha</strong><br>
-  tap CoinHub to trade. tap Settings to customize. other apps coming soon.<br>
-  time flows. markets move. light/dark auto-switches with game time.
+  <strong>CryptoLife · v0.2.1 alpha</strong><br>
+  CoinHub &amp; X are playable. other apps show previews — poke around.<br>
+  time flows · markets move · watch for impersonators on X.
 </div>
 
 <div class="phone">
@@ -1459,6 +1628,7 @@
               <p class="detail-price" id="detail-price">$0.00</p>
               <p class="detail-change" id="detail-change">—</p>
             </div>
+            <div class="detail-stats" id="detail-stats"></div>
             <div class="chart-container">
               <canvas id="price-chart"></canvas>
             </div>
@@ -1557,7 +1727,12 @@
               <div class="settings-row">
                 <i class="ti ti-device-mobile settings-row-icon" aria-hidden="true"></i>
                 <span class="settings-row-label">Version</span>
-                <span class="settings-row-val">v0.2 alpha</span>
+                <span class="settings-row-val">v0.2.1 alpha</span>
+              </div>
+              <div class="settings-row" data-settings-action="changelog">
+                <i class="ti ti-notes settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Changelog</span>
+                <i class="ti ti-chevron-right settings-row-arrow" aria-hidden="true"></i>
               </div>
               <div class="settings-row" id="restart-run-btn">
                 <i class="ti ti-refresh settings-row-icon" style="color: #dc2626;" aria-hidden="true"></i>
@@ -1576,6 +1751,13 @@
               <h3>Auto switch</h3>
               <p>each wallpaper has paired light and dark variants. they switch with game time of day (dawn ~6a, dusk ~7p).</p>
             </div>
+          </div>
+          <div class="changelog-panel" id="changelog-panel">
+            <div class="placeholder-header" style="border-bottom: 0.5px solid rgba(0,0,0,0.08);">
+              <span class="ph-back" id="changelog-back"><i class="ti ti-chevron-left"></i> Settings</span>
+              <p class="ph-title">Changelog</p>
+            </div>
+            <div class="changelog-scroll" id="changelog-scroll"></div>
           </div>
         </div>
       </div>
@@ -1606,7 +1788,7 @@
             <span class="ph-back" data-go-home="true"><i class="ti ti-chevron-left"></i> Home</span>
             <p class="ph-title" id="placeholder-title">App</p>
           </div>
-          <div class="placeholder-body">
+          <div class="placeholder-body" id="placeholder-body">
             <div class="ph-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
             <p class="ph-msg-title">coming soon</p>
             <p class="ph-msg-sub" id="placeholder-sub">this app is in development. check back as the game grows.</p>
@@ -2073,6 +2255,16 @@ function renderPortfolio() {
     <p class="portfolio-pnl ${pnlClass}">${pnl >= 0 ? "+" : ""}${fmtUSD(Math.abs(pnl))} · ${fmtPct(pnlPct)}</p>
     <div class="allocation-bar">${allocations}</div>
   </div>`;
+  const recentTrades = GAME.trades.slice(-3).reverse();
+  if (recentTrades.length > 0) {
+    html += `<div class="portfolio-activity"><p class="act-label">recent activity</p>`;
+    recentTrades.forEach(tr => {
+      const sym = ASSETS[tr.asset]?.symbol || tr.asset;
+      const verb = tr.type === "buy" ? "bought" : "sold";
+      html += `<p class="act-line">${verb} ${fmtAmount(tr.amount)} ${sym} · ${fmtUSD(tr.value)}</p>`;
+    });
+    html += `</div>`;
+  }
   html += `<div class="section-label">YOUR HOLDINGS · ${holdings.length}</div>`;
   if (holdings.length === 0) {
     html += `<div class="empty-state"><div class="icon">💼</div><div class="text">no positions yet</div></div>`;
@@ -2200,6 +2392,42 @@ function openDetail(id) {
   document.getElementById("detail-view").classList.add("open");
 }
 
+function pseudoStat(id, salt) {
+  let h = 0;
+  const s = id + String(salt);
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i);
+  return Math.abs(h);
+}
+
+function renderDetailStats(a) {
+  const el = document.getElementById("detail-stats");
+  if (!el) return;
+  if (a.isStable || a.id === "DAI") {
+    el.innerHTML = "";
+    return;
+  }
+  const hist = PRICE_HISTORY[a.id] || [];
+  const prices = hist.map(p => p.price);
+  const low = prices.length ? Math.min(...prices) : a.price * 0.92;
+  const high = prices.length ? Math.max(...prices) : a.price * 1.08;
+  const seed = pseudoStat(a.id, GAME.ticks);
+  const volM = a.id === "BTC" ? "42.1B" : `$${(((seed % 900) + 50) / 10).toFixed(1)}M`;
+  let stats = `
+    <div class="detail-stat"><p class="lbl">24h low</p><p class="val">${fmtPrice(low)}</p></div>
+    <div class="detail-stat"><p class="lbl">24h high</p><p class="val">${fmtPrice(high)}</p></div>
+    <div class="detail-stat"><p class="lbl">vol</p><p class="val">${volM}</p></div>`;
+  if (!a.isStatic) {
+    const holders = formatK((seed % 42000) + 800);
+    const mcap = fmtUSD(a.price * ((seed % 500) + 20) * 1e6);
+    const liq = a.isMorbius ? "locked" : (seed % 2 ? "thin" : "unlocked");
+    stats += `
+    <div class="detail-stat"><p class="lbl">mcap</p><p class="val">${mcap}</p></div>
+    <div class="detail-stat"><p class="lbl">holders</p><p class="val">${holders}</p></div>
+    <div class="detail-stat"><p class="lbl">liquidity</p><p class="val">${liq}</p></div>`;
+  }
+  el.innerHTML = stats;
+}
+
 function renderDetailContent() {
   const a = ASSETS[GAME.selectedAsset];
   if (!a) return;
@@ -2212,6 +2440,7 @@ function renderDetailContent() {
   document.getElementById("detail-price").textContent = fmtPrice(a.price);
   document.getElementById("detail-change").className = "detail-change " + pctClass;
   document.getElementById("detail-change").textContent = `${fmtPct(change)} · last hour`;
+  renderDetailStats(a);
   drawChart();
   const heldAmount = GAME.positions[a.id] || 0;
   const positionArea = document.getElementById("detail-position-area");
@@ -2523,6 +2752,7 @@ const ICONS = {
   "ti-circle-filled": '<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
   "ti-heart": '<path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/>',
   "ti-share": '<path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M8.7 10.7l6.6 -3.4"/><path d="M8.7 13.3l6.6 3.4"/>',
+  "ti-notes": '<path d="M5 3m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/><path d="M9 7l6 0"/><path d="M9 11l6 0"/><path d="M9 15l4 0"/>',
 };
 
 function renderIcons(root) {
@@ -2584,6 +2814,95 @@ const WALLPAPERS = [
   { id: "matrix", name: "Matrix", lightName: true },
 ];
 
+const FOLLOWING_ACCOUNTS = ["jenny", "vitalik", "morbius", "cryptodesk"];
+
+const APP_PREVIEW_DATA = {
+  metapocket: () => {
+    const addr = "0x7a3f…c2E1";
+    const bal = fmtUSD(walletTotalValue());
+    return `<div class="ph-wallet-card">
+      <p class="ph-wallet-label">main wallet</p>
+      <p class="ph-wallet-addr">${addr}</p>
+      <p class="ph-wallet-bal">${bal}</p>
+    </div>
+    <div class="ph-section-label">connected sites</div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#0052ff;">C</div>
+      <div class="ph-row-main"><p class="ph-row-title">coinhub.exchange</p><p class="ph-row-sub">active · read balances</p></div></div>
+    <div class="ph-row" style="opacity:0.45;"><div class="ph-row-avatar sq" style="background:#6b7280;">?</div>
+      <div class="ph-row-main"><p class="ph-row-title">pepe-gift.live</p><p class="ph-row-sub">not connected</p></div><span class="ph-muted-pill">blocked</span></div>`;
+  },
+  telegram: () => `<div class="ph-section-label">chats</div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#4ade80;">🐸</div>
+      <div class="ph-row-main"><p class="ph-row-title">PEPE2 Alpha</p><p class="ph-row-sub">anon_dev: chart looks insane rn</p></div><span class="ph-row-badge">12</span></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#7c3aed;">M</div>
+      <div class="ph-row-main"><p class="ph-row-title">Morbius Official</p><p class="ph-row-sub">mod: we never DM first</p></div></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#dc2626;">!</div>
+      <div class="ph-row-main"><p class="ph-row-title">PEPE2 Airdrop 🎁</p><p class="ph-row-sub">send seed to claim…</p></div><span class="ph-muted-pill">sus</span></div>`,
+  discord: () => `<div class="ph-section-label">servers</div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#5865f2;">D</div>
+      <div class="ph-row-main"><p class="ph-row-title">Degen Lounge</p><p class="ph-row-sub">#general · degen_anon: wagmi</p></div><span class="ph-row-badge">1</span></div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#7c3aed;">M</div>
+      <div class="ph-row-main"><p class="ph-row-title">Morbius Fi ✓</p><p class="ph-row-sub">#announcements · pinned audit</p></div></div>
+    <div class="ph-row" style="opacity:0.5;"><div class="ph-row-avatar sq" style="background:#374151;">🔒</div>
+      <div class="ph-row-main"><p class="ph-row-title">MorbiusFi Support</p><p class="ph-row-sub">DM: unusual activity detected</p></div><span class="ph-muted-pill">fake</span></div>`,
+  messages: () => `<div class="ph-section-label">messages</div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#f59e0b;">J</div>
+      <div class="ph-row-main"><p class="ph-row-title">Jenny</p><p class="ph-row-sub">did you see PEPE2? i'm sitting this one out</p></div><span class="ph-row-meta">2m</span></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#ec4899;">M</div>
+      <div class="ph-row-main"><p class="ph-row-title">Mom</p><p class="ph-row-sub">call me when you have a minute</p></div><span class="ph-row-meta">1h</span></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#6b7280;">?</div>
+      <div class="ph-row-main"><p class="ph-row-title">Unknown</p><p class="ph-row-sub">bro you HAVE to ape this 🚀🚀</p></div><span class="ph-muted-pill">new</span></div>`,
+  mail: () => `<div class="ph-section-label">inbox</div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#dc2626;">!</div>
+      <div class="ph-row-main"><p class="ph-row-title">CoinHub Security</p><p class="ph-row-sub">verify wallet within 24h — coinhub-verify.net</p></div><span class="ph-muted-pill">phish</span></div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#fbbf24;">D</div>
+      <div class="ph-row-main"><p class="ph-row-title">MakerDAO</p><p class="ph-row-sub">DAI savings rate update · no action needed</p></div><span class="ph-row-meta">Tue</span></div>
+    <div class="ph-row" style="opacity:0.55;"><div class="ph-row-avatar sq" style="background:#0052ff;">C</div>
+      <div class="ph-row-main"><p class="ph-row-title">CoinHub</p><p class="ph-row-sub">your weekly portfolio summary is ready</p></div><span class="ph-row-meta">Mon</span></div>`,
+};
+
+function renderPlaceholderApp(appId) {
+  const body = document.getElementById("placeholder-body");
+  const fn = APP_PREVIEW_DATA[appId];
+  if (!fn) {
+    body.className = "placeholder-body";
+    const app = APPS.find(a => a.id === appId);
+    body.innerHTML = `<div class="ph-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
+      <p class="ph-msg-title">coming soon</p>
+      <p class="ph-msg-sub">${escapeHtml(app?.desc || "this app is in development.")}</p>`;
+    renderIcons(body);
+    return;
+  }
+  body.className = "placeholder-body preview-mode";
+  body.innerHTML = `<div class="ph-preview-scroll">${fn()}</div>
+    <p class="ph-preview-foot">preview · gameplay hooks coming in a future update</p>`;
+  renderIcons(body);
+}
+
+const CHANGELOG_FALLBACK = `<h4>0.2.1 — 2026-05-26</h4><ul>
+<li>App previews for MetaPocket, Telegram, Discord, Messages, Mail</li>
+<li>CoinHub detail stats and portfolio activity</li>
+<li>X tags, Following tab, impersonator warnings</li>
+<li>Settings changelog viewer</li>
+</ul>`;
+
+function showChangelogPanel() {
+  document.getElementById("settings-scroll").style.display = "none";
+  document.getElementById("wallpaper-picker").style.display = "none";
+  const panel = document.getElementById("changelog-panel");
+  panel.classList.add("open");
+  const scroll = document.getElementById("changelog-scroll");
+  scroll.innerHTML = "<p style='opacity:0.5'>loading…</p>";
+  fetch("CHANGELOG.md").then(r => r.ok ? r.text() : Promise.reject()).then(md => {
+    const body = md.replace(/^#[^\n]+\n+/, "").replace(/^## \[Unreleased\]\n*/m, "<h4>unreleased</h4>")
+      .replace(/^### (.*)$/gm, "<p style='margin:12px 0 4px;font-weight:600;opacity:0.7'>$1</p>")
+      .replace(/^- (.*)$/gm, "<li>$1</li>")
+      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+      .replace(/^## (.*)$/gm, "<h4>$1</h4>");
+    scroll.innerHTML = body || CHANGELOG_FALLBACK;
+  }).catch(() => { scroll.innerHTML = CHANGELOG_FALLBACK; });
+}
+
 function renderHomeGrid() {
   const grid = document.getElementById("home-grid");
   grid.innerHTML = APPS.map(app => {
@@ -2625,7 +2944,7 @@ function openApp(appId) {
   } else {
     document.getElementById("window-placeholder").classList.add("active");
     document.getElementById("placeholder-title").textContent = app.name;
-    document.getElementById("placeholder-sub").textContent = app.desc || "this app is in development. check back as the game grows.";
+    renderPlaceholderApp(appId);
   }
 }
 
@@ -2673,6 +2992,7 @@ function applyTheme() {
 function showSettingsList() {
   document.getElementById("settings-scroll").style.display = "";
   document.getElementById("wallpaper-picker").style.display = "none";
+  document.getElementById("changelog-panel").classList.remove("open");
 }
 
 function showWallpaperPicker() {
@@ -2740,7 +3060,9 @@ document.querySelectorAll("[data-go-home]").forEach(el => {
 document.querySelector('[data-settings-action="wallpaper"]').addEventListener("click", showWallpaperPicker);
 document.querySelector('[data-settings-action="dark-mode"]').addEventListener("click", cycleThemeMode);
 document.querySelector('[data-settings-action="hud-style"]').addEventListener("click", cycleHudStyle);
+document.querySelector('[data-settings-action="changelog"]').addEventListener("click", showChangelogPanel);
 document.getElementById("wp-picker-back").addEventListener("click", showSettingsList);
+document.getElementById("changelog-back").addEventListener("click", showSettingsList);
 document.getElementById("restart-run-btn").addEventListener("click", restartRun);
 document.querySelectorAll(".toggle").forEach(t => {
   t.addEventListener("click", () => t.classList.toggle("off"));
@@ -2760,6 +3082,7 @@ const X = {
   selectedTweet: null,
   impersonatorCount: 0,
   maxFeedLength: 50,
+  activeTab: "foryou",
 };
 
 const X_ACCOUNTS = {
@@ -3005,17 +3328,31 @@ function xTickPost() {
   }
 }
 
+function getXFeedForTab() {
+  if (X.activeTab === "following") {
+    return X.feed.filter(t => FOLLOWING_ACCOUNTS.includes(t.accountKey));
+  }
+  return X.feed;
+}
+
 function renderXFeed() {
   const feedEl = document.getElementById("x-feed");
-  if (X.feed.length === 0) {
-    feedEl.innerHTML = `<div class="x-empty">no posts yet · wait a moment for the feed to load</div>`;
+  const visible = getXFeedForTab();
+  if (visible.length === 0) {
+    const msg = X.activeTab === "following"
+      ? "no posts from people you follow yet · try For you"
+      : "no posts yet · wait a moment for the feed to load";
+    feedEl.innerHTML = `<div class="x-empty">${msg}</div>`;
     return;
   }
-  const html = X.feed.map(t => {
+  const html = visible.map(t => {
     const age = GAME.gameMinute - t.ts;
     let verifyHtml = "";
     if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
     else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
+    let tagHtml = "";
+    if (t.tag === "news") tagHtml = `<span class="x-tag news">news</span>`;
+    else if (t.tag === "launch") tagHtml = `<span class="x-tag launch">launch</span>`;
     return `<div class="x-tweet" data-tweet-id="${t.id}">
       <div class="x-avatar" style="background:${t.avatarColor};">${t.avatarChar}</div>
       <div class="x-body">
@@ -3026,7 +3363,7 @@ function renderXFeed() {
           <span class="x-dot">·</span>
           <span class="x-time">${xFmtTime(age)}</span>
         </div>
-        <p class="x-text">${escapeHtml(t.text)}</p>
+        <p class="x-text">${tagHtml}${escapeHtml(t.text)}</p>
         <div class="x-meta">
           <span><i class="ti ti-message-circle" style="font-size:13px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
           <span>🔁 ${formatK(t.retweets)}</span>
@@ -3061,6 +3398,16 @@ function openXDetail(tweetId) {
   if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
   else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
   const age = GAME.gameMinute - t.ts;
+  const real = X_ACCOUNTS[t.accountKey];
+  const handleMismatch = real && t.handle !== real.handle;
+  let warnHtml = "";
+  if (t.isImpersonator || handleMismatch) {
+    const realHandle = real ? `@${real.handle}` : "the real account";
+    warnHtml = `<div class="x-warn-box">this post may be impersonating ${realHandle}. never send funds or seed phrases from a link in a post.</div>`;
+  }
+  let tagHtml = "";
+  if (t.tag === "news") tagHtml = `<span class="x-tag news">news</span> `;
+  else if (t.tag === "launch") tagHtml = `<span class="x-tag launch">launch</span> `;
   const detail = document.getElementById("x-detail-content");
   detail.innerHTML = `
     <div class="x-detail-row">
@@ -3070,7 +3417,7 @@ function openXDetail(tweetId) {
         <div class="x-detail-handle">@${escapeHtml(t.handle)}</div>
       </div>
     </div>
-    <p class="x-detail-text">${escapeHtml(t.text)}</p>
+    <p class="x-detail-text">${tagHtml}${escapeHtml(t.text)}</p>
     <p class="x-detail-time">${xFmtTime(age)} ago · ${formatK(t.likes * 10)} views</p>
     <div class="x-detail-meta">
       <span><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
@@ -3078,6 +3425,7 @@ function openXDetail(tweetId) {
       <span><i class="ti ti-heart" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.likes)}</span>
       <span><i class="ti ti-share" style="font-size:14px" aria-hidden="true"></i></span>
     </div>
+    ${warnHtml}
   `;
   renderIcons(detail);
 }
@@ -3117,6 +3465,15 @@ function xSeedFeed() {
 }
 
 document.getElementById("x-detail-back").addEventListener("click", closeXDetail);
+document.querySelectorAll(".x-strip-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".x-strip-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    X.activeTab = tab.dataset.xTab;
+    closeXDetail();
+    renderXFeed();
+  });
+});
 
 const _originalGameTick = gameTick;
 gameTick = function() {
