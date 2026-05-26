@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CryptoLife — v0.2 alpha</title>
+<title>CryptoLife — v0.2.1 alpha</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -791,6 +791,106 @@
   .inv-contract { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
   .inv-holders { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
 
+  .detail-stats {
+    display: flex;
+    gap: 0;
+    padding: 10px 18px 14px;
+    border-bottom: 0.5px solid #e5e7eb;
+    transition: border-color 0.4s ease;
+  }
+  .theme-dark .detail-stats { border-bottom-color: rgba(255,255,255,0.08); }
+  .detail-stat {
+    flex: 1;
+    text-align: center;
+  }
+  .detail-stat .lbl {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .theme-light .detail-stat .lbl { color: #9ca3af; }
+  .theme-dark .detail-stat .lbl { color: rgba(255,255,255,0.45); }
+  .detail-stat .val {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 4px 0 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .theme-light .detail-stat .val { color: #111; }
+  .theme-dark .detail-stat .val { color: #fff; }
+
+  .dossier-box {
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .theme-light .dossier-box { background: #f9fafb; border: 0.5px solid #e5e7eb; color: #374151; }
+  .theme-dark .dossier-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.75); }
+  .dossier-box .dossier-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin: 0 0 8px;
+  }
+  .dossier-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 4px 0;
+  }
+  .dossier-row .k { opacity: 0.65; }
+  .dossier-row .v { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .trade-slip {
+    font-size: 11px;
+    text-align: center;
+    margin: -4px 0 8px;
+    opacity: 0.7;
+  }
+  .theme-light .trade-slip { color: #b45309; }
+  .theme-dark .trade-slip { color: #fbbf24; }
+
+  .recent-trades {
+    padding: 0 16px 12px;
+  }
+  .recent-trade-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 0.5px solid #f3f4f6;
+    font-size: 12px;
+  }
+  .theme-dark .recent-trade-row { border-bottom-color: rgba(255,255,255,0.06); }
+  .recent-trade-row .side-buy { color: #16a34a; font-weight: 600; }
+  .recent-trade-row .side-sell { color: #dc2626; font-weight: 600; }
+
+  .x-cashtag {
+    color: #1d9bf0;
+    cursor: pointer;
+  }
+  .x-cashtag:hover { text-decoration: underline; }
+  .x-impersonator-warn {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  .theme-dark .x-impersonator-warn {
+    background: rgba(220,38,38,0.15);
+    color: #fca5a5;
+    border-color: rgba(220,38,38,0.35);
+  }
+
   .warning-box {
     background: #fef2f2;
     border-left: 3px solid #dc2626;
@@ -1384,8 +1484,8 @@
 <body>
 
 <div class="game-info">
-  <strong>CryptoLife · v0.2 alpha</strong><br>
-  tap CoinHub to trade. tap Settings to customize. other apps coming soon.<br>
+  <strong>CryptoLife · v0.2.1 alpha</strong><br>
+  CoinHub and X are live — trades, news, and social feed share the same world state.<br>
   time flows. markets move. light/dark auto-switches with game time.
 </div>
 
@@ -1459,6 +1559,7 @@
               <p class="detail-price" id="detail-price">$0.00</p>
               <p class="detail-change" id="detail-change">—</p>
             </div>
+            <div class="detail-stats" id="detail-stats"></div>
             <div class="chart-container">
               <canvas id="price-chart"></canvas>
             </div>
@@ -1505,6 +1606,7 @@
               <p class="pay-label">YOU RECEIVE</p>
               <p class="receive-amount" id="receive-amount">0 BTC</p>
             </div>
+            <p class="trade-slip" id="trade-slip" style="display:none;"></p>
             <button class="modal-confirm buy" id="modal-confirm">Confirm Buy</button>
             <button class="modal-cancel" id="modal-cancel">Cancel</button>
           </div>
@@ -1557,7 +1659,7 @@
               <div class="settings-row">
                 <i class="ti ti-device-mobile settings-row-icon" aria-hidden="true"></i>
                 <span class="settings-row-label">Version</span>
-                <span class="settings-row-val">v0.2 alpha</span>
+                <span class="settings-row-val">v0.2.1 alpha</span>
               </div>
               <div class="settings-row" id="restart-run-btn">
                 <i class="ti ti-refresh settings-row-icon" style="color: #dc2626;" aria-hidden="true"></i>
@@ -1758,6 +1860,75 @@ function fmtAmount(amt) {
   if (amt >= 1000) return (amt / 1000).toFixed(2) + "K";
   if (amt >= 1) return amt.toFixed(4);
   return amt.toFixed(8);
+}
+
+function fmtCompactUSD(v) {
+  if (v === undefined || v === null || isNaN(v)) return "$0";
+  if (v >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B";
+  if (v >= 1e6) return "$" + (v / 1e6).toFixed(2) + "M";
+  if (v >= 1e3) return "$" + (v / 1e3).toFixed(1) + "K";
+  return fmtUSD(v);
+}
+
+function tokenSupplyEstimate(asset) {
+  if (!asset || asset.isStable) return 1e9;
+  if (asset.isStatic) {
+    if (asset.id === "BTC") return 19.8e6;
+    if (asset.id === "PLS") return 135e12;
+    if (asset.id === "HEX") return 573e9;
+    return 1e9;
+  }
+  let h = 0;
+  const s = asset.symbol || asset.id || "";
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const base = asset.rugRisk > 0.5 ? 8e11 : asset.category === "AI" ? 2e8 : 4e10;
+  return base * (0.7 + (h % 60) / 100);
+}
+
+function get24hVolumeUSD(id) {
+  const a = ASSETS[id];
+  const hist = PRICE_HISTORY[id] || [];
+  if (!a || hist.length < 2) return 0;
+  const slice = hist.slice(-48);
+  let vol = 0;
+  for (let i = 1; i < slice.length; i++) {
+    vol += Math.abs(slice[i].price - slice[i - 1].price) * tokenSupplyEstimate(a) * 0.02;
+  }
+  const age = getAge(a);
+  if (age !== null && age < 120) vol *= 1.4 + Math.min(age, 60) / 60;
+  return vol;
+}
+
+function getMarketCapUSD(id) {
+  const a = ASSETS[id];
+  if (!a) return 0;
+  return a.price * tokenSupplyEstimate(a);
+}
+
+function estimateSlippagePct(asset, usdAmount) {
+  if (!asset || asset.isStatic || asset.isStable) return 0;
+  const liq = Math.max(5000, get24hVolumeUSD(asset.id) * 0.15);
+  const rug = asset.rugRisk || 0;
+  return Math.min(18, (usdAmount / liq) * 100 * (1 + rug * 2));
+}
+
+function buildTokenDossier(asset) {
+  if (!asset || asset.isStatic) return "";
+  const riskPct = asset.rugRisk ? Math.round(asset.rugRisk * 100) : 0;
+  const riskLabel = riskPct >= 60 ? "high" : riskPct >= 30 ? "elevated" : "moderate";
+  const age = getAge(asset);
+  const ageStr = age !== null ? fmtAge(age) : "—";
+  const vol24 = fmtCompactUSD(get24hVolumeUSD(asset.id));
+  const mcap = fmtCompactUSD(getMarketCapUSD(asset.id));
+  const flagLine = (asset.flags && asset.flags.length) ? asset.flags.join(" · ") : "no on-chain signals logged";
+  return `<div class="dossier-box">
+    <p class="dossier-title">DUE DILIGENCE · READ ONLY</p>
+    <div class="dossier-row"><span class="k">token age</span><span class="v">${ageStr}</span></div>
+    <div class="dossier-row"><span class="k">est. mcap</span><span class="v">${mcap}</span></div>
+    <div class="dossier-row"><span class="k">24h vol (est.)</span><span class="v">${vol24}</span></div>
+    <div class="dossier-row"><span class="k">rug risk</span><span class="v">${riskLabel} (${riskPct}%)</span></div>
+    <p style="margin:10px 0 0;font-size:11px;opacity:0.85;">${escapeHtml(flagLine)}</p>
+  </div>`;
 }
 
 function fmtAge(gameMinutes) {
@@ -2073,6 +2244,20 @@ function renderPortfolio() {
     <p class="portfolio-pnl ${pnlClass}">${pnl >= 0 ? "+" : ""}${fmtUSD(Math.abs(pnl))} · ${fmtPct(pnlPct)}</p>
     <div class="allocation-bar">${allocations}</div>
   </div>`;
+  const recentTrades = GAME.trades.slice(-5).reverse();
+  if (recentTrades.length > 0) {
+    html += `<div class="section-label">RECENT ACTIVITY</div><div class="recent-trades">`;
+    recentTrades.forEach(tr => {
+      const ta = ASSETS[tr.asset];
+      if (!ta) return;
+      const sideClass = tr.type === "buy" ? "side-buy" : "side-sell";
+      html += `<div class="recent-trade-row">
+        <span><span class="${sideClass}">${tr.type}</span> ${ta.symbol}</span>
+        <span>${fmtUSD(tr.value)} · D${Math.floor(tr.ts / (24 * 60)) + 1}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
   html += `<div class="section-label">YOUR HOLDINGS · ${holdings.length}</div>`;
   if (holdings.length === 0) {
     html += `<div class="empty-state"><div class="icon">💼</div><div class="text">no positions yet</div></div>`;
@@ -2181,6 +2366,7 @@ function updateLaunchesBadge() {
   } else {
     badge.style.display = "none";
   }
+  if (SHELL.currentApp === null) renderHomeGrid();
 }
 
 function openDetail(id) {
@@ -2212,6 +2398,16 @@ function renderDetailContent() {
   document.getElementById("detail-price").textContent = fmtPrice(a.price);
   document.getElementById("detail-change").className = "detail-change " + pctClass;
   document.getElementById("detail-change").textContent = `${fmtPct(change)} · last hour`;
+  const statsEl = document.getElementById("detail-stats");
+  if (a.isStable) {
+    statsEl.innerHTML = `<div class="detail-stat"><p class="lbl">peg</p><p class="val">$1.00</p></div>
+      <div class="detail-stat"><p class="lbl">24h</p><p class="val">${fmtPct(change)}</p></div>
+      <div class="detail-stat"><p class="lbl">type</p><p class="val">stable</p></div>`;
+  } else {
+    statsEl.innerHTML = `<div class="detail-stat"><p class="lbl">mcap</p><p class="val">${fmtCompactUSD(getMarketCapUSD(a.id))}</p></div>
+      <div class="detail-stat"><p class="lbl">24h vol</p><p class="val">${fmtCompactUSD(get24hVolumeUSD(a.id))}</p></div>
+      <div class="detail-stat"><p class="lbl">1h</p><p class="val ${pctClass}">${fmtPct(change)}</p></div>`;
+  }
   drawChart();
   const heldAmount = GAME.positions[a.id] || 0;
   const positionArea = document.getElementById("detail-position-area");
@@ -2247,13 +2443,8 @@ function renderDetailContent() {
   const investigateArea = document.getElementById("detail-investigate-area");
   if (a.investigate) {
     investigateArea.innerHTML = `<div class="investigate-section">
-      <p class="position-label">INVESTIGATE (coming soon — phone integration)</p>
-      <div class="investigate-grid">
-        <button class="investigate-btn inv-tg">📨 Telegram</button>
-        <button class="investigate-btn inv-x">𝕏 X Profile</button>
-        <button class="investigate-btn inv-contract">{ } Contract</button>
-        <button class="investigate-btn inv-holders">👥 Holders</button>
-      </div>
+      <p class="position-label">TOKEN DOSSIER</p>
+      ${buildTokenDossier(a)}
     </div>`;
   } else {
     investigateArea.innerHTML = "";
@@ -2338,6 +2529,23 @@ function openTradeModal(mode) {
   document.getElementById("modal-backdrop").classList.add("open");
 }
 
+function updateTradeSlippageHint() {
+  const a = ASSETS[GAME.selectedAsset];
+  const slipEl = document.getElementById("trade-slip");
+  if (!a || GAME.tradeMode !== "buy") {
+    slipEl.style.display = "none";
+    return;
+  }
+  const input = parseFloat(document.getElementById("pay-input").value) || 0;
+  const slip = estimateSlippagePct(a, input);
+  if (slip < 0.35) {
+    slipEl.style.display = "none";
+    return;
+  }
+  slipEl.style.display = "";
+  slipEl.textContent = `est. slippage ~${slip.toFixed(1)}% · thin liquidity on ${a.symbol}`;
+}
+
 function updateReceivePreview() {
   const a = ASSETS[GAME.selectedAsset];
   if (!a) return;
@@ -2349,6 +2557,7 @@ function updateReceivePreview() {
     const proceeds = input * a.price;
     document.getElementById("receive-amount").textContent = `${fmtUSD(proceeds)} DAI`;
   }
+  updateTradeSlippageHint();
 }
 
 function closeTradeModal() {
@@ -2523,6 +2732,7 @@ const ICONS = {
   "ti-circle-filled": '<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
   "ti-heart": '<path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/>',
   "ti-share": '<path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M8.7 10.7l6.6 -3.4"/><path d="M8.7 13.3l6.6 3.4"/>',
+  "ti-circle-check": '<path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/>',
 };
 
 function renderIcons(root) {
@@ -2568,10 +2778,10 @@ const SHELL = {
 const APPS = [
   { id: "metapocket", name: "MetaPocket", icon: "ti-wallet", color: "#f6851b", built: false, badge: 0, desc: "your wallet — holds tokens, signs transactions, manages connected sites" },
   { id: "coinhub", name: "CoinHub", icon: "ti-chart-candle", color: "#0052ff", built: true, badge: 0, desc: "" },
-  { id: "x", name: "X", icon: "ti-brand-x", color: "#000", builtDark: "#1c1c1e", built: true, badge: 9, desc: "social feed where news breaks, hype spreads, and scams thrive" },
-  { id: "telegram", name: "Telegram", icon: "ti-brand-telegram", color: "#29a9eb", built: false, badge: 3, desc: "group chats per token, DMs, and the duplicate channels you have to spot" },
-  { id: "discord", name: "Discord", icon: "ti-brand-discord", color: "#5865f2", built: false, badge: 1, desc: "community servers, mod channels, and impersonator DMs" },
-  { id: "messages", name: "Messages", icon: "ti-message-circle", color: "#34c759", built: false, badge: 2, desc: "iMessage-style threads with your closest friends — and the occasional hijacked account" },
+  { id: "x", name: "X", icon: "ti-brand-x", color: "#000", builtDark: "#1c1c1e", built: true, badge: 0, desc: "social feed where news breaks, hype spreads, and scams thrive" },
+  { id: "telegram", name: "Telegram", icon: "ti-brand-telegram", color: "#29a9eb", built: false, badge: 0, desc: "group chats per token, DMs, and the duplicate channels you have to spot" },
+  { id: "discord", name: "Discord", icon: "ti-brand-discord", color: "#5865f2", built: false, badge: 0, desc: "community servers, mod channels, and impersonator DMs" },
+  { id: "messages", name: "Messages", icon: "ti-message-circle", color: "#34c759", built: false, badge: 0, desc: "iMessage-style threads with your closest friends — and the occasional hijacked account" },
   { id: "mail", name: "Mail", icon: "ti-mail", color: "#1d9bf0", built: false, badge: 0, desc: "where phishing emails live — fake exchange notices, fake wallet alerts, the works" },
   { id: "settings", name: "Settings", icon: "ti-settings", color: "#6b7280", builtDark: "#3f3f46", built: true, badge: 0, desc: "" },
 ];
@@ -2584,10 +2794,19 @@ const WALLPAPERS = [
   { id: "matrix", name: "Matrix", lightName: true },
 ];
 
+function getAppBadgeCount(appId) {
+  if (appId === "x") return X.unreadCount;
+  if (appId === "coinhub") {
+    return Object.values(ASSETS).filter(a => !a.isStatic && !a.rugged && a.justLaunched).length;
+  }
+  return 0;
+}
+
 function renderHomeGrid() {
   const grid = document.getElementById("home-grid");
   grid.innerHTML = APPS.map(app => {
-    const badge = app.badge > 0 ? `<span class="home-app-badge">${app.badge > 9 ? "9+" : app.badge}</span>` : "";
+    const badgeN = getAppBadgeCount(app.id);
+    const badge = badgeN > 0 ? `<span class="home-app-badge">${badgeN > 9 ? "9+" : badgeN}</span>` : "";
     const builtClass = app.built ? "built" : "";
     const color = (SHELL.currentTheme === "dark" && app.builtDark) ? app.builtDark : app.color;
     return `<div class="home-app" data-app-id="${app.id}">
@@ -2760,6 +2979,8 @@ const X = {
   selectedTweet: null,
   impersonatorCount: 0,
   maxFeedLength: 50,
+  feedTab: "foryou",
+  following: ["jenny", "vitalik", "morbius", "cryptodesk"],
 };
 
 const X_ACCOUNTS = {
@@ -2988,6 +3209,20 @@ function xMaybeSpawnImpersonator() {
   X.impersonatorCount++;
 }
 
+function xLiveSymbolTweet() {
+  const live = Object.values(ASSETS).filter(a => !a.isStatic && !a.rugged && !a.isMorbius);
+  if (live.length === 0) return null;
+  const pick = xRand(live);
+  const ch = get1hChange(pick.id);
+  const dir = ch > 2 ? "ripping" : ch < -2 ? "bleeding" : "chopping";
+  const templates = [
+    `$${pick.symbol} ${dir} on my feed — ${fmtPct(ch)} last hour. nfa`,
+    `chart check: $${pick.symbol} at ${fmtPrice(pick.price)}. ${pick.hot ? "ct is loud" : "quiet tape"}`,
+    `aped a bag of $${pick.symbol} or ngmi — you tell me`,
+  ];
+  return xRand(templates);
+}
+
 function xTickPost() {
   if (GAME.ticks < X.nextTweetTick) return;
   const weights = { jenny: 3, degen: 4, vitalik: 2, cryptodesk: 1, morbius: 1 };
@@ -2996,7 +3231,13 @@ function xTickPost() {
     for (let i = 0; i < w; i++) accounts.push(key);
   }
   const accountKey = xRand(accounts);
-  xPostFromAccount(accountKey);
+  if (accountKey === "degen" && Math.random() < 0.35) {
+    const liveText = xLiveSymbolTweet();
+    if (liveText) xPostFromAccount("degen", liveText);
+    else xPostFromAccount(accountKey);
+  } else {
+    xPostFromAccount(accountKey);
+  }
   X.nextTweetTick = GAME.ticks + 1 + Math.floor(Math.random() * 2);
   const dayHours = Math.floor(GAME.gameMinute / 60);
   const sinceFirstImpersonator = X.impersonatorCount === 0 ? (dayHours >= 9 ? 1 : 0) : 1;
@@ -3005,18 +3246,53 @@ function xTickPost() {
   }
 }
 
+function linkCashtags(text) {
+  const escaped = escapeHtml(text);
+  return escaped.replace(/\$([A-Z0-9]{2,12})\b/g, (match, sym) => {
+    if (!ASSETS[sym]) return match;
+    return `<span class="x-cashtag" data-symbol="${sym}">${match}</span>`;
+  });
+}
+
+function openCoinFromSymbol(symbol) {
+  if (!ASSETS[symbol]) return;
+  if (SHELL.currentApp === "x") {
+    closeXDetail();
+    document.getElementById("window-x").classList.remove("active");
+  }
+  SHELL.currentApp = "coinhub";
+  document.getElementById("home-screen").classList.add("hidden");
+  document.getElementById("app-stage").classList.add("open");
+  document.querySelectorAll(".app-window").forEach(w => w.classList.remove("active"));
+  document.getElementById("window-coinhub").classList.add("active");
+  switchTab("markets");
+  openDetail(symbol);
+}
+
+function getXFeedSlice() {
+  if (X.feedTab === "following") {
+    return X.feed.filter(t => X.following.includes(t.accountKey));
+  }
+  return X.feed;
+}
+
 function renderXFeed() {
   const feedEl = document.getElementById("x-feed");
-  if (X.feed.length === 0) {
-    feedEl.innerHTML = `<div class="x-empty">no posts yet · wait a moment for the feed to load</div>`;
+  const slice = getXFeedSlice();
+  if (slice.length === 0) {
+    const msg = X.feedTab === "following"
+      ? "no posts from people you follow yet"
+      : "no posts yet · wait a moment for the feed to load";
+    feedEl.innerHTML = `<div class="x-empty">${msg}</div>`;
     return;
   }
-  const html = X.feed.map(t => {
+  const html = slice.map(t => {
     const age = GAME.gameMinute - t.ts;
+    const freshClass = age < 30 ? " fresh" : "";
     let verifyHtml = "";
     if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
     else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
-    return `<div class="x-tweet" data-tweet-id="${t.id}">
+    return `<div class="x-tweet${freshClass}" data-tweet-id="${t.id}">
       <div class="x-avatar" style="background:${t.avatarColor};">${t.avatarChar}</div>
       <div class="x-body">
         <div class="x-name-row">
@@ -3026,7 +3302,7 @@ function renderXFeed() {
           <span class="x-dot">·</span>
           <span class="x-time">${xFmtTime(age)}</span>
         </div>
-        <p class="x-text">${escapeHtml(t.text)}</p>
+        <p class="x-text">${linkCashtags(t.text)}</p>
         <div class="x-meta">
           <span><i class="ti ti-message-circle" style="font-size:13px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
           <span>🔁 ${formatK(t.retweets)}</span>
@@ -3037,7 +3313,15 @@ function renderXFeed() {
   }).join("");
   feedEl.innerHTML = html;
   feedEl.querySelectorAll(".x-tweet").forEach(el => {
-    el.addEventListener("click", () => openXDetail(el.dataset.tweetId));
+    el.addEventListener("click", (e) => {
+      const cashtag = e.target.closest(".x-cashtag");
+      if (cashtag) {
+        e.stopPropagation();
+        openCoinFromSymbol(cashtag.dataset.symbol);
+        return;
+      }
+      openXDetail(el.dataset.tweetId);
+    });
   });
   renderIcons(feedEl);
 }
@@ -3070,8 +3354,9 @@ function openXDetail(tweetId) {
         <div class="x-detail-handle">@${escapeHtml(t.handle)}</div>
       </div>
     </div>
-    <p class="x-detail-text">${escapeHtml(t.text)}</p>
+    <p class="x-detail-text">${linkCashtags(t.text)}</p>
     <p class="x-detail-time">${xFmtTime(age)} ago · ${formatK(t.likes * 10)} views</p>
+    ${t.isImpersonator ? `<div class="x-impersonator-warn">⚠ Possible impersonator — handle does not match the real @${escapeHtml(X_ACCOUNTS[t.accountKey].handle)}. Never send funds or seed phrases from DMs or reply links.</div>` : ""}
     <div class="x-detail-meta">
       <span><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
       <span>🔁 ${formatK(t.retweets)}</span>
@@ -3080,6 +3365,12 @@ function openXDetail(tweetId) {
     </div>
   `;
   renderIcons(detail);
+  detail.querySelectorAll(".x-cashtag").forEach(el => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openCoinFromSymbol(el.dataset.symbol);
+    });
+  });
 }
 
 function closeXDetail() {
@@ -3089,9 +3380,6 @@ function closeXDetail() {
 }
 
 function updateXBadge() {
-  const xApp = APPS.find(a => a.id === "x");
-  if (!xApp) return;
-  xApp.badge = X.unreadCount;
   if (SHELL.currentApp === null) renderHomeGrid();
 }
 
@@ -3117,6 +3405,16 @@ function xSeedFeed() {
 }
 
 document.getElementById("x-detail-back").addEventListener("click", closeXDetail);
+
+document.querySelectorAll(".x-strip-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".x-strip-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    X.feedTab = tab.dataset.xTab;
+    closeXDetail();
+    renderXFeed();
+  });
+});
 
 const _originalGameTick = gameTick;
 gameTick = function() {
