@@ -2998,6 +2998,7 @@ function showSettingsList() {
 function showWallpaperPicker() {
   document.getElementById("settings-scroll").style.display = "none";
   document.getElementById("wallpaper-picker").style.display = "";
+  document.getElementById("changelog-panel").classList.remove("open");
   renderWallpaperGrid();
 }
 
