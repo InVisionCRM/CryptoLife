@@ -1,17 +1,28 @@
-# CryptoLife — agent guide
+# CryptoLife — agent notes (Claude)
 
-Single-file phone sim at `index.html`. Built apps: **CoinHub**, **X**, **Settings**. Others show placeholder only until implemented.
+## What this is
+Single-file phone sim (`index.html`): trade on CoinHub, read news on X, customize in Settings. Other apps are previews until wired to gameplay.
 
-## Rules
+## Principles (read before and after every session)
+- **Less is more** — small, believable details beat large refactors.
+- **Do not invent gameplay** — if behavior is not in code, do not claim it works.
+- **One file for now** — prefer editing `index.html` unless the repo splits later.
+- **Placeholder apps** — show read-only previews with mock data; label as preview, not playable.
+- **Built apps** — CoinHub, X, Settings only. Do not half-implement scam/investigate loops without a designed hook.
 
-- **Production only** — no mock apps, no fake “coming soon” UI inside built apps. Use real game state (ASSETS, GAME, X feed).
-- **Less is more** — small believable details (copy, stats, dossiers), not full new subsystems.
-- **Changelog** — append to `CHANGELOG.md` after each meaningful code change.
-- **Economy** — wallet uses numbers for display; keep trade math consistent with existing `GAME` / `ASSETS`.
-- **Do not** inflate scope: no new placeholder apps, no CDN font deps, no separate build step unless asked.
+## Economy / numbers
+- Use plain JS numbers here (not on-chain); format money with existing `fmtUSD` / `fmtPrice`.
+- Bag = DAI cash + mark-to-market positions (`walletTotalValue`).
 
-## Built-app polish targets
+## UI
+- Match existing iOS-like patterns: placeholder headers, app-header, theme-light/dark on `.app-window`.
+- Keep copy lowercase and casual unless it's a "BREAKING" news line.
 
-- CoinHub: market rows, detail stats, investigate dossier from `flags`, trade modal fees.
-- X: feed tied to news/launches, cashtags, Following tab, impersonator cues in detail.
-- Settings: display prefs only; toggles are cosmetic unless wired.
+## After you change code
+1. Update `CHANGELOG.md` with a dated bullet.
+2. Re-read this file and `cursor.md` — confirm you did not violate scope.
+
+## Do not
+- Add build tooling or split files without being asked.
+- Remove or weaken rug/news/tick systems without explicit request.
+- Add dependencies beyond Chart.js CDN already in use.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CryptoLife — v0.2.1</title>
+<title>CryptoLife — v0.2.1 alpha</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -275,6 +275,175 @@
   }
   .theme-light .ph-msg-sub { color: #6b7280; }
   .theme-dark .ph-msg-sub { color: rgba(255,255,255,0.55); }
+  .placeholder-body.preview-mode {
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+    text-align: left;
+  }
+  .ph-preview-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+  .ph-preview-foot {
+    flex-shrink: 0;
+    padding: 10px 18px 24px;
+    font-size: 11px;
+    text-align: center;
+    opacity: 0.45;
+    border-top: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .theme-dark .ph-preview-foot { border-top-color: rgba(255,255,255,0.08); }
+  .ph-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    transition: background 0.4s ease;
+  }
+  .theme-dark .ph-row { border-bottom-color: rgba(255,255,255,0.06); }
+  .ph-row-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .ph-row-avatar.sq { border-radius: 12px; font-size: 16px; }
+  .ph-row-main { flex: 1; min-width: 0; }
+  .ph-row-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .theme-light .ph-row-title { color: #111; }
+  .theme-dark .ph-row-title { color: #fff; }
+  .ph-row-sub {
+    font-size: 12px;
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.55;
+  }
+  .ph-row-meta {
+    font-size: 11px;
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+  .ph-row-badge {
+    background: #dc2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 2px 6px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .ph-wallet-card {
+    margin: 14px;
+    padding: 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f6851b 0%, #e2761b 100%);
+    color: #fff;
+  }
+  .ph-wallet-label { font-size: 11px; opacity: 0.85; margin: 0; }
+  .ph-wallet-addr { font-size: 12px; font-family: ui-monospace, monospace; margin: 6px 0 0; opacity: 0.9; }
+  .ph-wallet-bal { font-size: 26px; font-weight: 600; margin: 12px 0 0; font-variant-numeric: tabular-nums; }
+  .ph-section-label {
+    padding: 12px 18px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.45;
+    text-transform: uppercase;
+  }
+  .ph-muted-pill {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  .detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .detail-stat {
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.04);
+  }
+  .theme-dark .detail-stat { background: rgba(255,255,255,0.06); }
+  .detail-stat .lbl { font-size: 10px; opacity: 0.5; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .detail-stat .val { font-size: 13px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; }
+  .portfolio-activity {
+    margin: 0 14px 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.03);
+  }
+  .theme-dark .portfolio-activity { background: rgba(255,255,255,0.05); }
+  .portfolio-activity .act-label { font-size: 10px; opacity: 0.5; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .portfolio-activity .act-line { font-size: 12px; margin: 0 0 4px; opacity: 0.85; }
+  .portfolio-activity .act-line:last-child { margin-bottom: 0; }
+  .x-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+    vertical-align: 1px;
+  }
+  .x-tag.news { background: rgba(29, 155, 240, 0.15); color: #1d9bf0; }
+  .x-tag.launch { background: rgba(22, 163, 74, 0.15); color: #16a34a; }
+  .x-warn-box {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    font-size: 12px;
+    line-height: 1.45;
+    color: #dc2626;
+  }
+  .theme-dark .x-warn-box { color: #f87171; }
+  .changelog-panel {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .changelog-panel.open { display: flex; }
+  .changelog-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 18px 32px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .changelog-scroll h4 { font-size: 14px; margin: 16px 0 6px; }
+  .changelog-scroll h4:first-child { margin-top: 0; }
+  .changelog-scroll ul { margin: 0 0 8px; padding-left: 18px; opacity: 0.85; }
 
   .settings-scroll {
     flex: 1;
@@ -688,33 +857,6 @@
     font-variant-numeric: tabular-nums;
     font-weight: 500;
   }
-  .detail-stats {
-    display: flex;
-    gap: 0;
-    padding: 0 18px 10px;
-    background: #fff;
-    transition: background 0.4s ease;
-  }
-  .theme-dark .detail-stats { background: #1c1c1e; }
-  .detail-stat {
-    flex: 1;
-    min-width: 0;
-  }
-  .detail-stat .lbl {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    margin: 0;
-    opacity: 0.55;
-  }
-  .detail-stat .val {
-    font-size: 12px;
-    font-weight: 600;
-    margin: 2px 0 0;
-    font-variant-numeric: tabular-nums;
-  }
-  .theme-light .detail-stat .val { color: #111; }
-  .theme-dark .detail-stat .val { color: #fff; }
 
   .chart-container {
     height: 180px;
@@ -798,95 +940,25 @@
     transition: background 0.4s ease, border-color 0.4s ease;
   }
   .theme-dark .investigate-section { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
-  .investigate-cards {
-    display: flex;
-    flex-direction: column;
+  .investigate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-top: 8px;
   }
-  .investigate-card {
-    border-radius: 10px;
-    padding: 10px 12px;
-    border: 0.5px solid #e5e7eb;
-    background: #f8fafc;
-    transition: background 0.4s ease, border-color 0.4s ease;
-  }
-  .theme-dark .investigate-card {
-    background: #0a0a0a;
-    border-color: rgba(255,255,255,0.08);
-  }
-  .investigate-card .ic-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    margin: 0 0 4px;
-    opacity: 0.7;
-  }
-  .investigate-card .ic-body {
+  .investigate-btn {
+    padding: 10px;
+    border-radius: 8px;
     font-size: 12px;
-    line-height: 1.45;
-    margin: 0;
-  }
-  .theme-light .investigate-card .ic-body { color: #374151; }
-  .theme-dark .investigate-card .ic-body { color: rgba(255,255,255,0.75); }
-  .investigate-card .ic-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10px;
-    word-break: break-all;
-    opacity: 0.85;
-  }
-
-  .modal-fee {
-    font-size: 11px;
-    text-align: center;
-    margin: 8px 0 0;
-    opacity: 0.55;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .rugged-stats-panel {
-    padding: 14px 18px;
-    border-bottom: 0.5px solid #e5e7eb;
-    transition: background 0.4s ease, border-color 0.4s ease;
-  }
-  .theme-light .rugged-stats-panel { background: #fff; border-bottom-color: #e5e7eb; }
-  .theme-dark .rugged-stats-panel { background: #1c1c1e; border-bottom-color: rgba(255,255,255,0.1); }
-  .rugged-stats-panel .rs-label {
-    font-size: 11px;
-    margin: 0;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    opacity: 0.55;
-  }
-  .rugged-stats-panel .rs-val {
-    font-size: 14px;
-    margin: 6px 0 0;
-    font-weight: 600;
-  }
-  .theme-light .rugged-stats-panel .rs-val { color: #111; }
-  .theme-dark .rugged-stats-panel .rs-val { color: #fff; }
-
-  .x-cashtag {
-    color: #1d9bf0;
-    font-weight: 500;
     cursor: pointer;
+    border: 1px solid;
+    text-align: center;
   }
-  .theme-dark .x-cashtag { color: #1d9bf0; }
-  .x-scam-banner {
-    margin: 0 16px 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    font-size: 12px;
-    line-height: 1.4;
-    color: #991b1b;
-  }
-  .theme-dark .x-scam-banner {
-    background: rgba(220, 38, 38, 0.12);
-    border-color: rgba(220, 38, 38, 0.35);
-    color: #fca5a5;
-  }
+  .inv-tg { background: #f0f9ff; color: #075985; border-color: #bae6fd; }
+  .inv-x { background: #fafafa; color: #111; border-color: #d4d4d4; }
+  .inv-contract { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
+  .inv-holders { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
 
   .warning-box {
     background: #fef2f2;
@@ -1481,9 +1553,9 @@
 <body>
 
 <div class="game-info">
-  <strong>CryptoLife · v0.2.1</strong><br>
-  CoinHub, X, and Settings are live on your phone. trade, read the feed, tune the shell.<br>
-  time flows · markets move · light/dark follows game time.
+  <strong>CryptoLife · v0.2.1 alpha</strong><br>
+  CoinHub &amp; X are playable. other apps show previews — poke around.<br>
+  time flows · markets move · watch for impersonators on X.
 </div>
 
 <div class="phone">
@@ -1556,6 +1628,7 @@
               <p class="detail-price" id="detail-price">$0.00</p>
               <p class="detail-change" id="detail-change">—</p>
             </div>
+            <div class="detail-stats" id="detail-stats"></div>
             <div class="chart-container">
               <canvas id="price-chart"></canvas>
             </div>
@@ -1602,7 +1675,6 @@
               <p class="pay-label">YOU RECEIVE</p>
               <p class="receive-amount" id="receive-amount">0 BTC</p>
             </div>
-            <p class="modal-fee" id="modal-fee">est. fee 0.10% · ~$0.00</p>
             <button class="modal-confirm buy" id="modal-confirm">Confirm Buy</button>
             <button class="modal-cancel" id="modal-cancel">Cancel</button>
           </div>
@@ -1650,25 +1722,17 @@
                 <div class="toggle off"></div>
               </div>
             </div>
-            <div class="settings-section-label">Phone</div>
-            <div class="settings-card">
-              <div class="settings-row">
-                <i class="ti ti-device-mobile settings-row-icon" aria-hidden="true"></i>
-                <span class="settings-row-label">Device</span>
-                <span class="settings-row-val">CryptoLife 15</span>
-              </div>
-              <div class="settings-row">
-                <i class="ti ti-info-circle settings-row-icon" aria-hidden="true"></i>
-                <span class="settings-row-label">Carrier</span>
-                <span class="settings-row-val">PulseMobile</span>
-              </div>
-            </div>
             <div class="settings-section-label">About</div>
             <div class="settings-card">
               <div class="settings-row">
                 <i class="ti ti-device-mobile settings-row-icon" aria-hidden="true"></i>
                 <span class="settings-row-label">Version</span>
-                <span class="settings-row-val">v0.2.1</span>
+                <span class="settings-row-val">v0.2.1 alpha</span>
+              </div>
+              <div class="settings-row" data-settings-action="changelog">
+                <i class="ti ti-notes settings-row-icon" aria-hidden="true"></i>
+                <span class="settings-row-label">Changelog</span>
+                <i class="ti ti-chevron-right settings-row-arrow" aria-hidden="true"></i>
               </div>
               <div class="settings-row" id="restart-run-btn">
                 <i class="ti ti-refresh settings-row-icon" style="color: #dc2626;" aria-hidden="true"></i>
@@ -1687,6 +1751,13 @@
               <h3>Auto switch</h3>
               <p>each wallpaper has paired light and dark variants. they switch with game time of day (dawn ~6a, dusk ~7p).</p>
             </div>
+          </div>
+          <div class="changelog-panel" id="changelog-panel">
+            <div class="placeholder-header" style="border-bottom: 0.5px solid rgba(0,0,0,0.08);">
+              <span class="ph-back" id="changelog-back"><i class="ti ti-chevron-left"></i> Settings</span>
+              <p class="ph-title">Changelog</p>
+            </div>
+            <div class="changelog-scroll" id="changelog-scroll"></div>
           </div>
         </div>
       </div>
@@ -1717,7 +1788,7 @@
             <span class="ph-back" data-go-home="true"><i class="ti ti-chevron-left"></i> Home</span>
             <p class="ph-title" id="placeholder-title">App</p>
           </div>
-          <div class="placeholder-body">
+          <div class="placeholder-body" id="placeholder-body">
             <div class="ph-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
             <p class="ph-msg-title">coming soon</p>
             <p class="ph-msg-sub" id="placeholder-sub">this app is in development. check back as the game grows.</p>
@@ -2109,79 +2180,6 @@ function getSparkColor(id) {
   return "#6b7280";
 }
 
-function getPriceStats(id) {
-  const hist = PRICE_HISTORY[id] || [];
-  if (hist.length < 2) return null;
-  const slice = hist.slice(-48);
-  const prices = slice.map(p => p.price);
-  const high = Math.max(...prices);
-  const low = Math.min(...prices);
-  const first = prices[0];
-  const volPct = first > 0 ? Math.abs((prices[prices.length - 1] - first) / first) * 100 : 0;
-  return { high, low, volPct };
-}
-
-function pseudoContract(symbol) {
-  let h = 5381;
-  for (let i = 0; i < symbol.length; i++) h = ((h << 5) + h) ^ symbol.charCodeAt(i);
-  const seed = Math.abs(h).toString(16).padStart(10, "0");
-  return `0x${seed.slice(0, 6)}…${seed.slice(-4)}`;
-}
-
-function estimateHolderConcentration(a) {
-  if (a.isStatic || a.isMorbius) return { top: 18, wallets: 12400 };
-  const risk = a.rugRisk || 0.35;
-  const top = Math.min(92, Math.round(35 + risk * 55));
-  const wallets = Math.max(80, Math.round(9000 - risk * 7000));
-  return { top, wallets };
-}
-
-function buildInvestigateDossier(a) {
-  const sym = a.symbol.toLowerCase();
-  const holders = estimateHolderConcentration(a);
-  const locked = (a.flags || []).some(f => /locked|renounced/i.test(f));
-  const audited = (a.flags || []).some(f => /audit/i.test(f));
-  const tgMembers = a.hot ? "18.4k" : (a.rugRisk > 0.5 ? "2.1k" : "6.8k");
-  const tgNote = a.hot
-    ? "mods pinned a buy link twice in the last hour"
-    : (a.rugRisk > 0.45 ? "three duplicate channels with the same logo" : "mostly price talk, low mod activity");
-  const xHandle = a.isMorbius ? "@MorbiusFi" : `@${sym}official`;
-  const xNote = a.isMorbius
-    ? "verified project account · no giveaway posts"
-    : (audited ? "team posts weekly updates" : "account created this week · heavy promo");
-  const contractNote = locked
-    ? "liquidity lock on file · owner renounced in scanner"
-    : "owner wallet can still mint · LP not locked";
-  return `<div class="investigate-cards">
-    <div class="investigate-card">
-      <p class="ic-title">TELEGRAM · $${escapeHtml(a.symbol)}</p>
-      <p class="ic-body">${tgMembers} members · ${escapeHtml(tgNote)}</p>
-    </div>
-    <div class="investigate-card">
-      <p class="ic-title">𝕏 PROFILE</p>
-      <p class="ic-body">${escapeHtml(xHandle)} · ${escapeHtml(xNote)}</p>
-    </div>
-    <div class="investigate-card">
-      <p class="ic-title">CONTRACT</p>
-      <p class="ic-body ic-mono">${pseudoContract(a.symbol)}</p>
-      <p class="ic-body" style="margin-top:4px;">${escapeHtml(contractNote)}</p>
-    </div>
-    <div class="investigate-card">
-      <p class="ic-title">HOLDERS</p>
-      <p class="ic-body">top wallet ${holders.top}% · ~${holders.wallets.toLocaleString()} holders on-chain</p>
-    </div>
-  </div>`;
-}
-
-function linkifyCashtags(text) {
-  const safe = escapeHtml(text);
-  return safe.replace(/\$([A-Za-z][A-Za-z0-9]{1,12})/g, (match, sym) => {
-    const asset = ASSETS[sym.toUpperCase()] || Object.values(ASSETS).find(a => a.symbol.toUpperCase() === sym.toUpperCase());
-    if (!asset || asset.rugged) return match;
-    return `<span class="x-cashtag" data-asset-id="${asset.id}" role="button">${match}</span>`;
-  });
-}
-
 function renderMarkets() {
   const container = document.getElementById("tab-markets");
   const blueChips = STATIC_ASSETS.map(a => ASSETS[a.id]);
@@ -2213,13 +2211,11 @@ function assetRowHtml(a) {
   else if (a.hot) badge = `<span class="badge badge-hot">hot</span>`;
   const age = getAge(a);
   const ageStr = age !== null ? ` · ${fmtAge(age)}` : "";
-  const stats = getPriceStats(a.id);
-  const volBit = stats && !a.isStable ? ` · vol ${stats.volPct.toFixed(1)}%` : "";
   return `<div class="asset-row" data-id="${a.id}">
     <div class="asset-icon" style="background:${a.color};">${a.emoji}</div>
     <div class="asset-info">
       <p class="asset-name">${a.name} ${badge}</p>
-      <p class="asset-meta">${a.symbol} · ${a.desc}${ageStr}${volBit}</p>
+      <p class="asset-meta">${a.symbol} · ${a.desc}${ageStr}</p>
     </div>
     <svg class="asset-spark" viewBox="0 0 60 28">
       <polyline points="${sparkPath}" fill="none" stroke="${sparkColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2253,20 +2249,22 @@ function renderPortfolio() {
     const pct = (h.value / total) * 100;
     if (pct > 0.5) allocations += `<div class="allocation-seg" style="width:${pct}%;background:${h.asset.color};"></div>`;
   });
-  const lastTrade = GAME.trades.length > 0 ? GAME.trades[GAME.trades.length - 1] : null;
-  let lastTradeLine = "";
-  if (lastTrade && ASSETS[lastTrade.asset]) {
-    const ta = ASSETS[lastTrade.asset];
-    const ago = GAME.gameMinute - lastTrade.ts;
-    lastTradeLine = `<p style="font-size:11px;margin:8px 0 0;opacity:0.55;">last ${lastTrade.type}: ${fmtAmount(lastTrade.amount)} ${ta.symbol} · ${fmtAge(ago)}</p>`;
-  }
   let html = `<div class="portfolio-summary">
     <p style="font-size:11px;color:#6b7280;margin:0;font-weight:600;letter-spacing:0.04em;">TOTAL VALUE</p>
     <p class="portfolio-total">${fmtUSD(total)}</p>
     <p class="portfolio-pnl ${pnlClass}">${pnl >= 0 ? "+" : ""}${fmtUSD(Math.abs(pnl))} · ${fmtPct(pnlPct)}</p>
     <div class="allocation-bar">${allocations}</div>
-    ${lastTradeLine}
   </div>`;
+  const recentTrades = GAME.trades.slice(-3).reverse();
+  if (recentTrades.length > 0) {
+    html += `<div class="portfolio-activity"><p class="act-label">recent activity</p>`;
+    recentTrades.forEach(tr => {
+      const sym = ASSETS[tr.asset]?.symbol || tr.asset;
+      const verb = tr.type === "buy" ? "bought" : "sold";
+      html += `<p class="act-line">${verb} ${fmtAmount(tr.amount)} ${sym} · ${fmtUSD(tr.value)}</p>`;
+    });
+    html += `</div>`;
+  }
   html += `<div class="section-label">YOUR HOLDINGS · ${holdings.length}</div>`;
   if (holdings.length === 0) {
     html += `<div class="empty-state"><div class="icon">💼</div><div class="text">no positions yet</div></div>`;
@@ -2343,9 +2341,9 @@ function renderRugged() {
   const hits = GAME.rugged.filter(r => r.youHeld).length;
   const dodged = GAME.rugged.length - hits;
   const totalSaved = GAME.rugged.filter(r => !r.youHeld).reduce((s, r) => s + r.peakPrice * 100, 0);
-  let html = `<div class="rugged-stats-panel">
-    <p class="rs-label">GRAVEYARD STATS</p>
-    <p class="rs-val">${GAME.rugged.length} rugs · hit ${hits} · dodged ${dodged}</p>
+  let html = `<div style="padding:14px 18px;background:#fff;border-bottom:0.5px solid #e5e7eb;">
+    <p style="font-size:11px;color:#6b7280;margin:0;font-weight:600;letter-spacing:0.04em;">GRAVEYARD STATS</p>
+    <p style="font-size:14px;color:#111;margin:6px 0 0;font-weight:600;">${GAME.rugged.length} rugs · hit ${hits} · dodged ${dodged}</p>
   </div>`;
   html += GAME.rugged.slice().reverse().map(r => {
     let summary = "";
@@ -2394,6 +2392,42 @@ function openDetail(id) {
   document.getElementById("detail-view").classList.add("open");
 }
 
+function pseudoStat(id, salt) {
+  let h = 0;
+  const s = id + String(salt);
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i);
+  return Math.abs(h);
+}
+
+function renderDetailStats(a) {
+  const el = document.getElementById("detail-stats");
+  if (!el) return;
+  if (a.isStable || a.id === "DAI") {
+    el.innerHTML = "";
+    return;
+  }
+  const hist = PRICE_HISTORY[a.id] || [];
+  const prices = hist.map(p => p.price);
+  const low = prices.length ? Math.min(...prices) : a.price * 0.92;
+  const high = prices.length ? Math.max(...prices) : a.price * 1.08;
+  const seed = pseudoStat(a.id, GAME.ticks);
+  const volM = a.id === "BTC" ? "42.1B" : `$${(((seed % 900) + 50) / 10).toFixed(1)}M`;
+  let stats = `
+    <div class="detail-stat"><p class="lbl">24h low</p><p class="val">${fmtPrice(low)}</p></div>
+    <div class="detail-stat"><p class="lbl">24h high</p><p class="val">${fmtPrice(high)}</p></div>
+    <div class="detail-stat"><p class="lbl">vol</p><p class="val">${volM}</p></div>`;
+  if (!a.isStatic) {
+    const holders = formatK((seed % 42000) + 800);
+    const mcap = fmtUSD(a.price * ((seed % 500) + 20) * 1e6);
+    const liq = a.isMorbius ? "locked" : (seed % 2 ? "thin" : "unlocked");
+    stats += `
+    <div class="detail-stat"><p class="lbl">mcap</p><p class="val">${mcap}</p></div>
+    <div class="detail-stat"><p class="lbl">holders</p><p class="val">${holders}</p></div>
+    <div class="detail-stat"><p class="lbl">liquidity</p><p class="val">${liq}</p></div>`;
+  }
+  el.innerHTML = stats;
+}
+
 function renderDetailContent() {
   const a = ASSETS[GAME.selectedAsset];
   if (!a) return;
@@ -2406,27 +2440,7 @@ function renderDetailContent() {
   document.getElementById("detail-price").textContent = fmtPrice(a.price);
   document.getElementById("detail-change").className = "detail-change " + pctClass;
   document.getElementById("detail-change").textContent = `${fmtPct(change)} · last hour`;
-  const priceSection = document.querySelector(".detail-price-section");
-  let statsEl = document.getElementById("detail-stats-row");
-  if (!statsEl && priceSection) {
-    statsEl = document.createElement("div");
-    statsEl.id = "detail-stats-row";
-    statsEl.className = "detail-stats";
-    priceSection.appendChild(statsEl);
-  }
-  const stats = getPriceStats(a.id);
-  if (statsEl) {
-    if (stats && !a.isStable) {
-      statsEl.style.display = "flex";
-      statsEl.innerHTML = `
-        <div class="detail-stat"><p class="lbl">24H HIGH</p><p class="val">${fmtPrice(stats.high)}</p></div>
-        <div class="detail-stat"><p class="lbl">24H LOW</p><p class="val">${fmtPrice(stats.low)}</p></div>
-        <div class="detail-stat"><p class="lbl">RANGE</p><p class="val">${stats.volPct.toFixed(1)}%</p></div>`;
-    } else {
-      statsEl.style.display = "none";
-      statsEl.innerHTML = "";
-    }
-  }
+  renderDetailStats(a);
   drawChart();
   const heldAmount = GAME.positions[a.id] || 0;
   const positionArea = document.getElementById("detail-position-area");
@@ -2462,8 +2476,13 @@ function renderDetailContent() {
   const investigateArea = document.getElementById("detail-investigate-area");
   if (a.investigate) {
     investigateArea.innerHTML = `<div class="investigate-section">
-      <p class="position-label">DUE DILIGENCE</p>
-      ${buildInvestigateDossier(a)}
+      <p class="position-label">INVESTIGATE (coming soon — phone integration)</p>
+      <div class="investigate-grid">
+        <button class="investigate-btn inv-tg">📨 Telegram</button>
+        <button class="investigate-btn inv-x">𝕏 X Profile</button>
+        <button class="investigate-btn inv-contract">{ } Contract</button>
+        <button class="investigate-btn inv-holders">👥 Holders</button>
+      </div>
     </div>`;
   } else {
     investigateArea.innerHTML = "";
@@ -2552,18 +2571,12 @@ function updateReceivePreview() {
   const a = ASSETS[GAME.selectedAsset];
   if (!a) return;
   const input = parseFloat(document.getElementById("pay-input").value) || 0;
-  const feeEl = document.getElementById("modal-fee");
-  let notional = input;
   if (GAME.tradeMode === "buy") {
     const amount = a.price > 0 ? input / a.price : 0;
     document.getElementById("receive-amount").textContent = `${fmtAmount(amount)} ${a.symbol}`;
   } else {
-    notional = input * a.price;
-    document.getElementById("receive-amount").textContent = `${fmtUSD(notional)} DAI`;
-  }
-  if (feeEl) {
-    const fee = notional * 0.001;
-    feeEl.textContent = `est. fee 0.10% · ~${fmtUSD(fee)}`;
+    const proceeds = input * a.price;
+    document.getElementById("receive-amount").textContent = `${fmtUSD(proceeds)} DAI`;
   }
 }
 
@@ -2737,9 +2750,9 @@ const ICONS = {
   "ti-search": '<path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/>',
   "ti-bell": '<path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/>',
   "ti-circle-filled": '<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
-  "ti-circle-check": '<path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/>',
   "ti-heart": '<path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/>',
   "ti-share": '<path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M8.7 10.7l6.6 -3.4"/><path d="M8.7 13.3l6.6 3.4"/>',
+  "ti-notes": '<path d="M5 3m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/><path d="M9 7l6 0"/><path d="M9 11l6 0"/><path d="M9 15l4 0"/>',
 };
 
 function renderIcons(root) {
@@ -2785,10 +2798,10 @@ const SHELL = {
 const APPS = [
   { id: "metapocket", name: "MetaPocket", icon: "ti-wallet", color: "#f6851b", built: false, badge: 0, desc: "your wallet — holds tokens, signs transactions, manages connected sites" },
   { id: "coinhub", name: "CoinHub", icon: "ti-chart-candle", color: "#0052ff", built: true, badge: 0, desc: "" },
-  { id: "x", name: "X", icon: "ti-brand-x", color: "#000", builtDark: "#1c1c1e", built: true, badge: 0, desc: "social feed where news breaks, hype spreads, and scams thrive" },
-  { id: "telegram", name: "Telegram", icon: "ti-brand-telegram", color: "#29a9eb", built: false, badge: 0, desc: "group chats per token, DMs, and the duplicate channels you have to spot" },
-  { id: "discord", name: "Discord", icon: "ti-brand-discord", color: "#5865f2", built: false, badge: 0, desc: "community servers, mod channels, and impersonator DMs" },
-  { id: "messages", name: "Messages", icon: "ti-message-circle", color: "#34c759", built: false, badge: 0, desc: "iMessage-style threads with your closest friends — and the occasional hijacked account" },
+  { id: "x", name: "X", icon: "ti-brand-x", color: "#000", builtDark: "#1c1c1e", built: true, badge: 9, desc: "social feed where news breaks, hype spreads, and scams thrive" },
+  { id: "telegram", name: "Telegram", icon: "ti-brand-telegram", color: "#29a9eb", built: false, badge: 3, desc: "group chats per token, DMs, and the duplicate channels you have to spot" },
+  { id: "discord", name: "Discord", icon: "ti-brand-discord", color: "#5865f2", built: false, badge: 1, desc: "community servers, mod channels, and impersonator DMs" },
+  { id: "messages", name: "Messages", icon: "ti-message-circle", color: "#34c759", built: false, badge: 2, desc: "iMessage-style threads with your closest friends — and the occasional hijacked account" },
   { id: "mail", name: "Mail", icon: "ti-mail", color: "#1d9bf0", built: false, badge: 0, desc: "where phishing emails live — fake exchange notices, fake wallet alerts, the works" },
   { id: "settings", name: "Settings", icon: "ti-settings", color: "#6b7280", builtDark: "#3f3f46", built: true, badge: 0, desc: "" },
 ];
@@ -2800,6 +2813,95 @@ const WALLPAPERS = [
   { id: "lavender", name: "Lavender", lightName: false },
   { id: "matrix", name: "Matrix", lightName: true },
 ];
+
+const FOLLOWING_ACCOUNTS = ["jenny", "vitalik", "morbius", "cryptodesk"];
+
+const APP_PREVIEW_DATA = {
+  metapocket: () => {
+    const addr = "0x7a3f…c2E1";
+    const bal = fmtUSD(walletTotalValue());
+    return `<div class="ph-wallet-card">
+      <p class="ph-wallet-label">main wallet</p>
+      <p class="ph-wallet-addr">${addr}</p>
+      <p class="ph-wallet-bal">${bal}</p>
+    </div>
+    <div class="ph-section-label">connected sites</div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#0052ff;">C</div>
+      <div class="ph-row-main"><p class="ph-row-title">coinhub.exchange</p><p class="ph-row-sub">active · read balances</p></div></div>
+    <div class="ph-row" style="opacity:0.45;"><div class="ph-row-avatar sq" style="background:#6b7280;">?</div>
+      <div class="ph-row-main"><p class="ph-row-title">pepe-gift.live</p><p class="ph-row-sub">not connected</p></div><span class="ph-muted-pill">blocked</span></div>`;
+  },
+  telegram: () => `<div class="ph-section-label">chats</div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#4ade80;">🐸</div>
+      <div class="ph-row-main"><p class="ph-row-title">PEPE2 Alpha</p><p class="ph-row-sub">anon_dev: chart looks insane rn</p></div><span class="ph-row-badge">12</span></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#7c3aed;">M</div>
+      <div class="ph-row-main"><p class="ph-row-title">Morbius Official</p><p class="ph-row-sub">mod: we never DM first</p></div></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#dc2626;">!</div>
+      <div class="ph-row-main"><p class="ph-row-title">PEPE2 Airdrop 🎁</p><p class="ph-row-sub">send seed to claim…</p></div><span class="ph-muted-pill">sus</span></div>`,
+  discord: () => `<div class="ph-section-label">servers</div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#5865f2;">D</div>
+      <div class="ph-row-main"><p class="ph-row-title">Degen Lounge</p><p class="ph-row-sub">#general · degen_anon: wagmi</p></div><span class="ph-row-badge">1</span></div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#7c3aed;">M</div>
+      <div class="ph-row-main"><p class="ph-row-title">Morbius Fi ✓</p><p class="ph-row-sub">#announcements · pinned audit</p></div></div>
+    <div class="ph-row" style="opacity:0.5;"><div class="ph-row-avatar sq" style="background:#374151;">🔒</div>
+      <div class="ph-row-main"><p class="ph-row-title">MorbiusFi Support</p><p class="ph-row-sub">DM: unusual activity detected</p></div><span class="ph-muted-pill">fake</span></div>`,
+  messages: () => `<div class="ph-section-label">messages</div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#f59e0b;">J</div>
+      <div class="ph-row-main"><p class="ph-row-title">Jenny</p><p class="ph-row-sub">did you see PEPE2? i'm sitting this one out</p></div><span class="ph-row-meta">2m</span></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#ec4899;">M</div>
+      <div class="ph-row-main"><p class="ph-row-title">Mom</p><p class="ph-row-sub">call me when you have a minute</p></div><span class="ph-row-meta">1h</span></div>
+    <div class="ph-row"><div class="ph-row-avatar" style="background:#6b7280;">?</div>
+      <div class="ph-row-main"><p class="ph-row-title">Unknown</p><p class="ph-row-sub">bro you HAVE to ape this 🚀🚀</p></div><span class="ph-muted-pill">new</span></div>`,
+  mail: () => `<div class="ph-section-label">inbox</div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#dc2626;">!</div>
+      <div class="ph-row-main"><p class="ph-row-title">CoinHub Security</p><p class="ph-row-sub">verify wallet within 24h — coinhub-verify.net</p></div><span class="ph-muted-pill">phish</span></div>
+    <div class="ph-row"><div class="ph-row-avatar sq" style="background:#fbbf24;">D</div>
+      <div class="ph-row-main"><p class="ph-row-title">MakerDAO</p><p class="ph-row-sub">DAI savings rate update · no action needed</p></div><span class="ph-row-meta">Tue</span></div>
+    <div class="ph-row" style="opacity:0.55;"><div class="ph-row-avatar sq" style="background:#0052ff;">C</div>
+      <div class="ph-row-main"><p class="ph-row-title">CoinHub</p><p class="ph-row-sub">your weekly portfolio summary is ready</p></div><span class="ph-row-meta">Mon</span></div>`,
+};
+
+function renderPlaceholderApp(appId) {
+  const body = document.getElementById("placeholder-body");
+  const fn = APP_PREVIEW_DATA[appId];
+  if (!fn) {
+    body.className = "placeholder-body";
+    const app = APPS.find(a => a.id === appId);
+    body.innerHTML = `<div class="ph-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
+      <p class="ph-msg-title">coming soon</p>
+      <p class="ph-msg-sub">${escapeHtml(app?.desc || "this app is in development.")}</p>`;
+    renderIcons(body);
+    return;
+  }
+  body.className = "placeholder-body preview-mode";
+  body.innerHTML = `<div class="ph-preview-scroll">${fn()}</div>
+    <p class="ph-preview-foot">preview · gameplay hooks coming in a future update</p>`;
+  renderIcons(body);
+}
+
+const CHANGELOG_FALLBACK = `<h4>0.2.1 — 2026-05-26</h4><ul>
+<li>App previews for MetaPocket, Telegram, Discord, Messages, Mail</li>
+<li>CoinHub detail stats and portfolio activity</li>
+<li>X tags, Following tab, impersonator warnings</li>
+<li>Settings changelog viewer</li>
+</ul>`;
+
+function showChangelogPanel() {
+  document.getElementById("settings-scroll").style.display = "none";
+  document.getElementById("wallpaper-picker").style.display = "none";
+  const panel = document.getElementById("changelog-panel");
+  panel.classList.add("open");
+  const scroll = document.getElementById("changelog-scroll");
+  scroll.innerHTML = "<p style='opacity:0.5'>loading…</p>";
+  fetch("CHANGELOG.md").then(r => r.ok ? r.text() : Promise.reject()).then(md => {
+    const body = md.replace(/^#[^\n]+\n+/, "").replace(/^## \[Unreleased\]\n*/m, "<h4>unreleased</h4>")
+      .replace(/^### (.*)$/gm, "<p style='margin:12px 0 4px;font-weight:600;opacity:0.7'>$1</p>")
+      .replace(/^- (.*)$/gm, "<li>$1</li>")
+      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+      .replace(/^## (.*)$/gm, "<h4>$1</h4>");
+    scroll.innerHTML = body || CHANGELOG_FALLBACK;
+  }).catch(() => { scroll.innerHTML = CHANGELOG_FALLBACK; });
+}
 
 function renderHomeGrid() {
   const grid = document.getElementById("home-grid");
@@ -2842,7 +2944,7 @@ function openApp(appId) {
   } else {
     document.getElementById("window-placeholder").classList.add("active");
     document.getElementById("placeholder-title").textContent = app.name;
-    document.getElementById("placeholder-sub").textContent = app.desc || "this app is in development. check back as the game grows.";
+    renderPlaceholderApp(appId);
   }
 }
 
@@ -2890,11 +2992,13 @@ function applyTheme() {
 function showSettingsList() {
   document.getElementById("settings-scroll").style.display = "";
   document.getElementById("wallpaper-picker").style.display = "none";
+  document.getElementById("changelog-panel").classList.remove("open");
 }
 
 function showWallpaperPicker() {
   document.getElementById("settings-scroll").style.display = "none";
   document.getElementById("wallpaper-picker").style.display = "";
+  document.getElementById("changelog-panel").classList.remove("open");
   renderWallpaperGrid();
 }
 
@@ -2957,7 +3061,9 @@ document.querySelectorAll("[data-go-home]").forEach(el => {
 document.querySelector('[data-settings-action="wallpaper"]').addEventListener("click", showWallpaperPicker);
 document.querySelector('[data-settings-action="dark-mode"]').addEventListener("click", cycleThemeMode);
 document.querySelector('[data-settings-action="hud-style"]').addEventListener("click", cycleHudStyle);
+document.querySelector('[data-settings-action="changelog"]').addEventListener("click", showChangelogPanel);
 document.getElementById("wp-picker-back").addEventListener("click", showSettingsList);
+document.getElementById("changelog-back").addEventListener("click", showSettingsList);
 document.getElementById("restart-run-btn").addEventListener("click", restartRun);
 document.querySelectorAll(".toggle").forEach(t => {
   t.addEventListener("click", () => t.classList.toggle("off"));
@@ -2977,10 +3083,8 @@ const X = {
   selectedTweet: null,
   impersonatorCount: 0,
   maxFeedLength: 50,
-  feedTab: "foryou",
+  activeTab: "foryou",
 };
-
-const X_FOLLOWING_ACCOUNTS = ["jenny", "vitalik", "morbius"];
 
 const X_ACCOUNTS = {
   cryptodesk: {
@@ -3225,30 +3329,32 @@ function xTickPost() {
   }
 }
 
-function getXFeedSlice() {
-  if (X.feedTab === "following") {
-    return X.feed.filter(t => X_FOLLOWING_ACCOUNTS.includes(t.accountKey));
+function getXFeedForTab() {
+  if (X.activeTab === "following") {
+    return X.feed.filter(t => FOLLOWING_ACCOUNTS.includes(t.accountKey));
   }
   return X.feed;
 }
 
 function renderXFeed() {
   const feedEl = document.getElementById("x-feed");
-  const slice = getXFeedSlice();
-  if (slice.length === 0) {
-    const emptyMsg = X.feedTab === "following"
+  const visible = getXFeedForTab();
+  if (visible.length === 0) {
+    const msg = X.activeTab === "following"
       ? "no posts from people you follow yet · try For you"
       : "no posts yet · wait a moment for the feed to load";
-    feedEl.innerHTML = `<div class="x-empty">${emptyMsg}</div>`;
+    feedEl.innerHTML = `<div class="x-empty">${msg}</div>`;
     return;
   }
-  const html = slice.map(t => {
+  const html = visible.map(t => {
     const age = GAME.gameMinute - t.ts;
-    const freshClass = age < 5 ? " fresh" : "";
     let verifyHtml = "";
     if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
     else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
-    return `<div class="x-tweet${freshClass}" data-tweet-id="${t.id}">
+    let tagHtml = "";
+    if (t.tag === "news") tagHtml = `<span class="x-tag news">news</span>`;
+    else if (t.tag === "launch") tagHtml = `<span class="x-tag launch">launch</span>`;
+    return `<div class="x-tweet" data-tweet-id="${t.id}">
       <div class="x-avatar" style="background:${t.avatarColor};">${t.avatarChar}</div>
       <div class="x-body">
         <div class="x-name-row">
@@ -3258,7 +3364,7 @@ function renderXFeed() {
           <span class="x-dot">·</span>
           <span class="x-time">${xFmtTime(age)}</span>
         </div>
-        <p class="x-text">${linkifyCashtags(t.text)}</p>
+        <p class="x-text">${tagHtml}${escapeHtml(t.text)}</p>
         <div class="x-meta">
           <span><i class="ti ti-message-circle" style="font-size:13px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
           <span>🔁 ${formatK(t.retweets)}</span>
@@ -3269,32 +3375,9 @@ function renderXFeed() {
   }).join("");
   feedEl.innerHTML = html;
   feedEl.querySelectorAll(".x-tweet").forEach(el => {
-    el.addEventListener("click", (e) => {
-      if (e.target.closest(".x-cashtag")) return;
-      openXDetail(el.dataset.tweetId);
-    });
-  });
-  feedEl.querySelectorAll(".x-cashtag").forEach(el => {
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const assetId = el.dataset.assetId;
-      if (!assetId || !ASSETS[assetId]) return;
-      goHome();
-      openApp("coinhub");
-      switchTab("markets");
-      openDetail(assetId);
-    });
+    el.addEventListener("click", () => openXDetail(el.dataset.tweetId));
   });
   renderIcons(feedEl);
-}
-
-function switchXTab(tab) {
-  X.feedTab = tab;
-  document.querySelectorAll(".x-strip-tab").forEach(el => {
-    el.classList.toggle("active", el.dataset.xTab === tab);
-  });
-  closeXDetail();
-  renderXFeed();
 }
 
 function formatK(n) {
@@ -3316,26 +3399,26 @@ function openXDetail(tweetId) {
   if (t.verified === true) verifyHtml = `<span class="x-verify"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
   else if (t.verified === "gold") verifyHtml = `<span class="x-verify-gold"><i class="ti ti-circle-check" aria-hidden="true"></i></span>`;
   const age = GAME.gameMinute - t.ts;
+  const real = X_ACCOUNTS[t.accountKey];
+  const handleMismatch = real && t.handle !== real.handle;
+  let warnHtml = "";
+  if (t.isImpersonator || handleMismatch) {
+    const realHandle = real ? `@${real.handle}` : "the real account";
+    warnHtml = `<div class="x-warn-box">this post may be impersonating ${realHandle}. never send funds or seed phrases from a link in a post.</div>`;
+  }
+  let tagHtml = "";
+  if (t.tag === "news") tagHtml = `<span class="x-tag news">news</span> `;
+  else if (t.tag === "launch") tagHtml = `<span class="x-tag launch">launch</span> `;
   const detail = document.getElementById("x-detail-content");
-  const scamBanner = t.isImpersonator
-    ? `<div class="x-scam-banner">This post may impersonate a known account. Compare the handle character-by-character before trusting links or DMs.</div>`
-    : "";
-  const realAccount = X_ACCOUNTS[t.accountKey];
-  const handleMismatch = realAccount && t.handle !== realAccount.handle;
-  const handleNote = handleMismatch && !t.isImpersonator
-    ? `<p style="font-size:12px;color:#6b7280;margin:0 0 10px;">posted from @${escapeHtml(t.handle)}</p>`
-    : "";
   detail.innerHTML = `
-    ${scamBanner}
     <div class="x-detail-row">
       <div class="x-avatar" style="background:${t.avatarColor};">${t.avatarChar}</div>
       <div>
         <div class="x-detail-name">${escapeHtml(t.name)} ${verifyHtml}</div>
-        <div class="x-detail-handle">@${escapeHtml(t.handle)}${realAccount && handleMismatch ? ` · real: @${escapeHtml(realAccount.handle)}` : ""}</div>
+        <div class="x-detail-handle">@${escapeHtml(t.handle)}</div>
       </div>
     </div>
-    ${handleNote}
-    <p class="x-detail-text">${linkifyCashtags(t.text)}</p>
+    <p class="x-detail-text">${tagHtml}${escapeHtml(t.text)}</p>
     <p class="x-detail-time">${xFmtTime(age)} ago · ${formatK(t.likes * 10)} views</p>
     <div class="x-detail-meta">
       <span><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.replies)}</span>
@@ -3343,19 +3426,9 @@ function openXDetail(tweetId) {
       <span><i class="ti ti-heart" style="font-size:14px" aria-hidden="true"></i> ${formatK(t.likes)}</span>
       <span><i class="ti ti-share" style="font-size:14px" aria-hidden="true"></i></span>
     </div>
+    ${warnHtml}
   `;
   renderIcons(detail);
-  detail.querySelectorAll(".x-cashtag").forEach(el => {
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const assetId = el.dataset.assetId;
-      if (!assetId || !ASSETS[assetId]) return;
-      goHome();
-      openApp("coinhub");
-      switchTab("markets");
-      openDetail(assetId);
-    });
-  });
 }
 
 function closeXDetail() {
@@ -3393,8 +3466,14 @@ function xSeedFeed() {
 }
 
 document.getElementById("x-detail-back").addEventListener("click", closeXDetail);
-document.querySelectorAll(".x-strip-tab").forEach(el => {
-  el.addEventListener("click", () => switchXTab(el.dataset.xTab));
+document.querySelectorAll(".x-strip-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".x-strip-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    X.activeTab = tab.dataset.xTab;
+    closeXDetail();
+    renderXFeed();
+  });
 });
 
 const _originalGameTick = gameTick;
