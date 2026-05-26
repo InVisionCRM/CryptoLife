@@ -4,7 +4,8 @@ All notable changes to CryptoLife (`index.html`).
 
 ## [Unreleased]
 
-_Nothing yet._
+### Fixed
+- Settings wallpaper picker now closes the changelog panel when opened.
 
 ## [0.2.1] — 2026-05-26
 
